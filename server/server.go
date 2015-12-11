@@ -41,13 +41,14 @@ func (s *Server) Start() {
 			site.uri = siteRoot
 			var r, _ = exists(site.path + "/app")
 			var siteDir http.Handler
+			fmt.Println("http://localhost:" + s.port + site.uri)
 			if(r) {
 				siteDir = http.FileServer(http.Dir(site.path + "/app"))
 			} else {
 				siteDir = http.FileServer(http.Dir(site.path))
 			}
 			http.Handle(site.uri, http.StripPrefix(site.uri, siteDir))
-			fmt.Println("http://localhost:" + s.port + site.uri)
+			
 		}
     }
 	if err := http.ListenAndServe(":" + s.port, nil); err != nil {

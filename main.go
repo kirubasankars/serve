@@ -1,14 +1,19 @@
 package main
 
-import (	
+import (
 	"github.com/serve/server"
-	"github.com/serve/metal"
+	"log"
+	"os"
+	"path/filepath"
 )
 
-func main() {
-	var m = metal.NewMetal();
-	_ = m
+func main() {	
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+    if err != nil {
+        log.Fatal(err)
+		return
+    }
 	var s = new(server.Server);
-	s.SetConfig("C:/workspace/go/bin", "3000")
+	s.SetConfig(dir, "3000")
 	s.Start()
 }
