@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 )
 
-func main() {	
+func main() {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-    if err != nil {
-        log.Fatal(err)
+	if err != nil {
+		log.Fatal(err)
 		return
-    }
+	}
 	var s = new(server.Server);
 	s.SetConfig(dir, "3000")
 	s.Start()
