@@ -4,8 +4,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-
-	"github.com/serve/server"
 )
 
 func main() {
@@ -15,7 +13,7 @@ func main() {
 		return
 	}
 
-	var s = new(server.Server)
+	var s = new(Server)
 	s.SetConfig(dir, "3000")
 	s.Start()
 }
