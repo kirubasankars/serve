@@ -53,6 +53,8 @@ func (server *Server) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 		server.sites[f.Name()] = site
 
+		fmt.Println(server.host + site.uri)
+
 		http.Redirect(w, r, r.URL.Path, http.StatusFound)
 		return
 	} else {
