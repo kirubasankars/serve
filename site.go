@@ -16,15 +16,18 @@ type Site struct {
 }
 
 func (site *Site) Build() {
-	var siteDir http.Handler
-	appDir, _ := exists(site.path + "/app")
-	if appDir {
-		siteDir = http.FileServer(http.Dir(site.path + "/app"))
-	} else {
-		siteDir = http.FileServer(http.Dir(site.path))
-	}
 
-	http.Handle(site.uri, http.StripPrefix(site.uri, siteDir))
+	http.HandleFunc(site.uri, func(w http.ResponseWriter, r *http.Request) {
+		parts := strings.Split(r.URL.Path, site.uri)
+		filePath := ""
+		appDir, _ := exists(site.path + "/app")
+		if appDir {
+			filePath = site.path + "/app/" + parts[1]
+		} else {
+			filePath = site.path + "/" + parts[1]
+		}
+		http.ServeFile(w, r, filePath)
+	})
 
 	http.HandleFunc(site.uri+"api/", func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/api")
