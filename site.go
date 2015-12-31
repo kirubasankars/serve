@@ -1,9 +1,9 @@
 package main
 
 import (
+	"log"
 	"net/http"
-	"os"
-	"strings"
+	"time"
 )
 
 type Site struct {
@@ -15,36 +15,28 @@ type Site struct {
 }
 
 func (site *Site) Build() {
+	var mux = site.server.http
 
-	http.Handle(site.uri, &FileServe{site})
-
-	http.HandleFunc(site.uri+"api/", func(w http.ResponseWriter, r *http.Request) {
-		parts := strings.Split(r.URL.Path, "/api")
-		model := site.GetModel(parts[1] + "/" + strings.ToLower(r.Method))
-		site.HandleAPI(model, w, r)
-	})
-
-	http.HandleFunc(site.uri+"html/", func(w http.ResponseWriter, r *http.Request) {
-		parts := strings.Split(r.URL.Path, "/html")
-		model := site.GetModel(parts[1] + "/" + strings.ToLower(r.Method))
-		site.HandleHTMLTemplate(model, w, r)
-	})
-
-	http.HandleFunc(site.uri+"text/", func(w http.ResponseWriter, r *http.Request) {
-		parts := strings.Split(r.URL.Path, "/text")
-		model := site.GetModel(parts[1] + "/" + strings.ToLower(r.Method))
-		site.HandleTextTemplate(model, w, r)
-	})
-
+	mux.Handle(site.uri, Handler(&FileServe{site}))
+	mux.Handle(site.uri+"api/", Handler(&ApiServe{site}))
+	mux.Handle(site.uri+"html/", Handler(&HtmlServe{site}))
+	mux.Handle(site.uri+"text/", Handler(&TextServe{site}))
 }
 
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
+func Handler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
 	}
-	if os.IsNotExist(err) {
-		return false, nil
+	h := http.HandlerFunc(fn)
+	return loggingHandler(h)
+}
+
+func loggingHandler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		t1 := time.Now()
+		next.ServeHTTP(w, r)
+		t2 := time.Now()
+		log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), t2.Sub(t1))
 	}
-	return true, err
+	return http.HandlerFunc(fn)
 }

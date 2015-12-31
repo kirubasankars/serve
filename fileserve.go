@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -20,4 +21,15 @@ func (fileServe *FileServe) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		filePath = site.path + "/" + parts[1]
 	}
 	http.ServeFile(w, r, filePath)
+}
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }
