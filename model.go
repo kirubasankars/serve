@@ -3,15 +3,20 @@ package main
 import (
 	"io/ioutil"
 
-	"github.com/metal"
+	"github.com/serve/libs/metal"
 )
 
 func (site *Site) GetModel(path string) *metal.Metal {
 	model := metal.NewMetal()
-	var jsonPath = site.path + "/api" + path + ".json"
-	var data = readContent(jsonPath)
-	model.Parse(data)
-	return model
+	var apiPath = site.path + "/api" + path
+	if data := readContent(apiPath + ".sql"); data != nil {
+		getData(string(data), model)
+		return model
+	} else {
+		var data = readContent(apiPath + ".json")
+		model.Parse(data)
+		return model
+	}
 }
 
 func readContent(path string) []byte {
@@ -19,5 +24,5 @@ func readContent(path string) []byte {
 	if data, _ = ioutil.ReadFile(path); data != nil {
 		return data
 	}
-	return data
+	return nil
 }

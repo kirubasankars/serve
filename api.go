@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/metal"
+	"github.com/serve/libs/metal"
 )
 
 func (site *Site) HandleAPI(model *metal.Metal, w http.ResponseWriter, r *http.Request) {

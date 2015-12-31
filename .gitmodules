@@ -1,3 +1,6 @@
-[submodule "metal"]
-	path = metal
+[submodule "libs/metal"]
+	path = libs/metal
 	url = https://github.com/kirubasankars/metal.git
+[submodule "libs/pq"]
+	path = libs/pq
+	url = https://github.com/lib/pq.git
