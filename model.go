@@ -3,7 +3,7 @@ package main
 import (
 	"io/ioutil"
 
-	"github.com/serve/libs/metal"
+	"github.com/serve/lib/metal"
 )
 
 func (site *Site) GetModel(path string) *metal.Metal {

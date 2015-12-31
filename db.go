@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/serve/libs/metal"
-	_ "github.com/serve/libs/pq"
+	"github.com/serve/lib/metal"
+	_ "github.com/serve/lib/pq"
 )
 
 func getData(query string, m *metal.Metal) {

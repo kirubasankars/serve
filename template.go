@@ -7,7 +7,7 @@ import (
 	"strings"
 	text "text/template"
 
-	"github.com/serve/libs/metal"
+	"github.com/serve/lib/metal"
 )
 
 func (site *Site) HandleHTMLTemplate(model *metal.Metal, w http.ResponseWriter, r *http.Request) {
