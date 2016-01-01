@@ -4,3 +4,6 @@
 [submodule "lib/pq"]
 	path = lib/pq
 	url = https://github.com/lib/pq.git
+[submodule "lib/pg"]
+	path = lib/pg
+	url = https://github.com/lib/pq.git
