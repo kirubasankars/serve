@@ -1,58 +1,28 @@
 package main
 
 import (
-	html "html/template"
 	"net/http"
-	"path"
 	"strings"
-	text "text/template"
-
-	"github.com/serve/lib/metal"
 )
 
-func (site *Site) HandleHTMLTemplate(model *metal.Metal, w http.ResponseWriter, r *http.Request) {
-
-	if model == nil {
-		http.Error(w, "No api found.", http.StatusInternalServerError)
-		return
-	}
-
-	paths := strings.Split(r.URL.Path, "html/")
-
-	w.Header().Set("Content-Type", "text/html")
-	templatePath := path.Join(site.path, "tpl/html/", paths[1], "get.html")
-
-	tmpl, err := html.ParseFiles(templatePath)
-
-	if err != nil {
-		http.Error(w, "No Template found.", http.StatusInternalServerError)
-		return
-	}
-
-	if err := tmpl.Execute(w, model.Raw()); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+type HtmlServe struct {
+	site *Site
 }
 
-func (site *Site) HandleTextTemplate(model *metal.Metal, w http.ResponseWriter, r *http.Request) {
-	if model == nil {
-		http.Error(w, "No api found.", http.StatusInternalServerError)
-		return
-	}
+func (htmlServe *HtmlServe) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var site = htmlServe.site
+	parts := strings.Split(r.URL.Path, "/html")
+	model := site.GetModel(parts[1] + "/" + strings.ToLower(r.Method))
+	site.HandleHTMLTemplate(model, w, r)
+}
 
-	paths := strings.Split(r.URL.Path, "text/")
+type TextServe struct {
+	site *Site
+}
 
-	w.Header().Set("Content-Type", "text/plain")
-	templatePath := path.Join(site.path, "tpl/text/", paths[1], "get.txt")
-
-	tmpl, err := text.ParseFiles(templatePath)
-
-	if err != nil {
-		http.Error(w, "No Template found.", http.StatusInternalServerError)
-		return
-	}
-
-	if err := tmpl.Execute(w, model.Raw()); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+func (textServe *TextServe) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var site = textServe.site
+	parts := strings.Split(r.URL.Path, "/text")
+	model := site.GetModel(parts[1] + "/" + strings.ToLower(r.Method))
+	site.HandleTextTemplate(model, w, r)
 }

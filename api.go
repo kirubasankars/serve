@@ -1,27 +1,17 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
-
-	"github.com/serve/lib/metal"
+	"strings"
 )
 
-func (site *Site) HandleAPI(model *metal.Metal, w http.ResponseWriter, r *http.Request) {
+type ApiServe struct {
+	site *Site
+}
 
-	if model == nil {
-		http.Error(w, "No api found.", http.StatusInternalServerError)
-		return
-	}
-
-	rs, err := json.Marshal(model.Raw())
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	w.Write(rs)
+func (apiServe *ApiServe) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var site = apiServe.site
+	parts := strings.Split(r.URL.Path, "/api")
+	model := site.GetModel(parts[1] + "/" + strings.ToLower(r.Method))
+	site.HandleAPI(model, w, r)
 }
