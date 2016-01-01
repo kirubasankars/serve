@@ -92,6 +92,14 @@ func (site *Site) HandleTextTemplate(model *metal.Metal, w http.ResponseWriter, 
 	}
 }
 
+func (site *Site) Model(path string) *metal.Metal {
+	model := metal.NewMetal()
+	var apiPath = site.path + "/api" + path
+	var data = readContent(apiPath + ".json")
+	model.Parse(data)
+	return model
+}
+
 func Handler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		next.ServeHTTP(w, r)
