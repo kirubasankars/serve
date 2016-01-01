@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/serve/lib/metal"
-	_ "github.com/serve/lib/pq"
+	_ "github.com/serve/lib/pg"
 )
 
 func getData(query string, m *metal.Metal) {

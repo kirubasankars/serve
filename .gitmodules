@@ -1,9 +1,3 @@
 [submodule "lib/metal"]
 	path = lib/metal
 	url = https://github.com/kirubasankars/metal.git
-[submodule "lib/pq"]
-	path = lib/pq
-	url = https://github.com/lib/pq.git
-[submodule "lib/pg"]
-	path = lib/pg
-	url = https://github.com/lib/pq.git
