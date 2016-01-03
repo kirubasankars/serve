@@ -50,11 +50,11 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			site.Build()
 
 			server.sites[site.name] = site
-
-			handler, _ := mux.Handler(r)
-			handler.ServeHTTP(w, r)
 		}
 	}
+
+	handler, _ := mux.Handler(r)
+	handler.ServeHTTP(w, r)
 }
 
 func (server *Server) Start() {
