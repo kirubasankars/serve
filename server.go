@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"path/filepath"
 	"regexp"
+	"sync"
 )
 
 type Server struct {
@@ -14,6 +14,7 @@ type Server struct {
 
 	sites map[string]*Site
 	http  *http.ServeMux
+	mutex *sync.Mutex
 }
 
 func (server *Server) SetConfig(path string, port string) {
@@ -28,45 +29,40 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var (
-		mux  = server.http
-		re   = regexp.MustCompile("^/\\w+")
-		path = ""
-	)
-	path = re.FindString(r.URL.Path)
+	mux := server.http
+	re := regexp.MustCompile("^/\\w+")
+	path := re.FindString(r.URL.Path)
 	appPath := server.path + "/sites" + path
 
-	f, err := os.Stat(appPath)
-	if err != nil || f == nil {
-		http.NotFound(w, r)
-		return
+	f := Stat(appPath)
+
+	server.mutex.Lock()
+	defer server.mutex.Unlock()
+
+	if _, p := server.sites[f.Name]; !p {
+		if f != nil {
+			site := new(Site)
+			site.name = f.Name
+			site.path = server.path + "/sites" + "/" + site.name
+			site.uri = "/" + site.name + "/"
+			site.server = server
+			site.Build()
+			server.sites[site.name] = site
+		} else {
+			http.NotFound(w, r)
+			return
+		}
 	}
 
-	if f.IsDir() {
-		site := new(Site)
-		site.name = f.Name()
-		site.path = server.path + "/sites" + "/" + f.Name()
-		site.uri = "/" + f.Name() + "/"
-		site.server = server
-		site.Build()
-
-		server.sites[f.Name()] = site
-
-		handler, _ := mux.Handler(r)
-		handler.ServeHTTP(w, r)
-
-		return
-	} else {
-		http.NotFound(w, r)
-
-		return
-	}
+	handler, _ := mux.Handler(r)
+	handler.ServeHTTP(w, r)
 }
 
 func (server *Server) Start() {
 	mux := http.NewServeMux()
 	server.http = mux
 	server.sites = make(map[string]*Site)
+	server.mutex = &sync.Mutex{}
 	mux.Handle("/", server)
 
 	if err := http.ListenAndServe(server.host, server.http); err != nil {

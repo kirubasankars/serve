@@ -22,6 +22,24 @@ type Site struct {
 	server *Server
 }
 
+func Handler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+	}
+	h := http.HandlerFunc(fn)
+	return loggingHandler(h)
+}
+
+func loggingHandler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		t1 := time.Now()
+		next.ServeHTTP(w, r)
+		t2 := time.Now()
+		log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), t2.Sub(t1))
+	}
+	return http.HandlerFunc(fn)
+}
+
 func (site *Site) Build() {
 	var mux = site.server.http
 
@@ -95,25 +113,7 @@ func (site *Site) HandleTextTemplate(model *metal.Metal, w http.ResponseWriter, 
 func (site *Site) Model(path string) *metal.Metal {
 	model := metal.NewMetal()
 	var apiPath = site.path + "/api" + path
-	var data = readContent(apiPath + ".json")
+	var data = ReadContent(apiPath + ".json")
 	model.Parse(data)
 	return model
-}
-
-func Handler(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		next.ServeHTTP(w, r)
-	}
-	h := http.HandlerFunc(fn)
-	return loggingHandler(h)
-}
-
-func loggingHandler(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		t1 := time.Now()
-		next.ServeHTTP(w, r)
-		t2 := time.Now()
-		log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), t2.Sub(t1))
-	}
-	return http.HandlerFunc(fn)
 }
