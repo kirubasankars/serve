@@ -51,10 +51,14 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			server.sites[site.name] = site
 		}
+
+		handler, _ := mux.Handler(r)
+		handler.ServeHTTP(w, r)
+		return
 	}
 
-	handler, _ := mux.Handler(r)
-	handler.ServeHTTP(w, r)
+	http.NotFound(w, r)
+	return
 }
 
 func (server *Server) Start() {
