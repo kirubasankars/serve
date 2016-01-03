@@ -13,11 +13,11 @@ func (fileServe *FileServe) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var site = fileServe.site
 	parts := strings.Split(r.URL.Path, site.uri)
 	filePath := ""
-	appDir, _ := exists(site.path + "/app")
+	appDir, _ := IsExists(site.path + "/app")
 	if appDir {
 		filePath = site.path + "/app/" + parts[1]
 	} else {
 		filePath = site.path + "/" + parts[1]
 	}
-	http.ServeFile(w, r, filePath)
+	http.ServeFile(w, r, filePath) //TODO:Should be using ServeContent
 }
