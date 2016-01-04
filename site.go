@@ -1,15 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
-	"path"
-	"strings"
 	"time"
-
-	html "html/template"
-	text "text/template"
 
 	"github.com/serve/lib/metal"
 )
@@ -19,95 +13,48 @@ type Site struct {
 	path string
 	uri  string
 
-	server *Server
+	server  *Server
+	builder SiteBuilder
 }
 
-func Handler(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		next.ServeHTTP(w, r)
-	}
-	h := http.HandlerFunc(fn)
-	return loggingHandler(h)
+type HttpHandler interface {
+	ServeHTTP(site *Site, w http.ResponseWriter, r *http.Request)
 }
 
-func loggingHandler(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		t1 := time.Now()
-		next.ServeHTTP(w, r)
-		t2 := time.Now()
-		log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), t2.Sub(t1))
+type SiteHandler struct {
+	site    *Site
+	handler HttpHandler
+}
+
+func (sitehandler *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	site := sitehandler.site
+	t1 := time.Now()
+
+	if IsExists(site.path + "/_auth") {
+		if cookie, err := r.Cookie("_auth"); err == nil {
+			value := make(map[string]string)
+			if err = site.server.jar.Decode("_auth", cookie.Value, &value); err == nil {
+				sitehandler.handler.ServeHTTP(sitehandler.site, w, r)
+			} else {
+				http.Redirect(w, r, "/_auth?redirectUrl="+r.URL.Path, http.StatusFound)
+			}
+		} else {
+			http.Redirect(w, r, "/_auth?redirectUrl="+r.URL.Path, http.StatusFound)
+		}
+	} else {
+		sitehandler.handler.ServeHTTP(sitehandler.site, w, r)
 	}
-	return http.HandlerFunc(fn)
+
+	t2 := time.Now()
+	log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), t2.Sub(t1))
 }
 
 func (site *Site) Build() {
-	var mux = site.server.http
-
-	mux.Handle(site.uri, Handler(&FileServe{site}))
-	mux.Handle(site.uri+"api/", Handler(&ApiServe{site}))
-	mux.Handle(site.uri+"html/", Handler(&HtmlServe{site}))
-	mux.Handle(site.uri+"text/", Handler(&TextServe{site}))
+	site.builder.Build(site)
 }
 
-func (site *Site) HandleAPI(model *metal.Metal, w http.ResponseWriter, r *http.Request) {
-	if model == nil {
-		http.Error(w, "No api found.", http.StatusInternalServerError)
-		return
-	}
-	rs, err := json.Marshal(model.Raw())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(rs)
-}
-
-func (site *Site) HandleHTMLTemplate(model *metal.Metal, w http.ResponseWriter, r *http.Request) {
-
-	if model == nil {
-		http.Error(w, "No api found.", http.StatusInternalServerError)
-		return
-	}
-
-	paths := strings.Split(r.URL.Path, "html/")
-
-	w.Header().Set("Content-Type", "text/html")
-	templatePath := path.Join(site.path, "tpl/html/", paths[1], "get.html")
-
-	tmpl, err := html.ParseFiles(templatePath)
-
-	if err != nil {
-		http.Error(w, "No Template found.", http.StatusInternalServerError)
-		return
-	}
-
-	if err := tmpl.Execute(w, model.Raw()); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-func (site *Site) HandleTextTemplate(model *metal.Metal, w http.ResponseWriter, r *http.Request) {
-	if model == nil {
-		http.Error(w, "No api found.", http.StatusInternalServerError)
-		return
-	}
-
-	paths := strings.Split(r.URL.Path, "text/")
-
-	w.Header().Set("Content-Type", "text/plain")
-	templatePath := path.Join(site.path, "tpl/text/", paths[1], "get.txt")
-
-	tmpl, err := text.ParseFiles(templatePath)
-
-	if err != nil {
-		http.Error(w, "No Template found.", http.StatusInternalServerError)
-		return
-	}
-
-	if err := tmpl.Execute(w, model.Raw()); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+func (site *Site) SetupHandler(pattern string, handler HttpHandler) {
+	site.server.http.Handle(pattern, &SiteHandler{site: site, handler: handler})
 }
 
 func (site *Site) Model(path string) *metal.Metal {

@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"sync"
+
+	"github.com/serve/lib/securecookie"
 )
 
 type Server struct {
@@ -15,6 +17,10 @@ type Server struct {
 	sites map[string]*Site
 	http  *http.ServeMux
 	mutex *sync.Mutex
+
+	jar *securecookie.SecureCookie
+
+	siteBuilders map[string]SiteBuilder
 }
 
 func (server *Server) SetConfig(path string, port string) {
@@ -36,17 +42,25 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	f := Stat(appPath)
 
-	server.mutex.Lock()
-	defer server.mutex.Unlock()
-
 	if f != nil {
+
+		server.mutex.Lock()
+		defer server.mutex.Unlock()
+
 		if _, p := server.sites[f.Name]; p == false {
 
 			site := new(Site)
 			site.name = f.Name
-			site.path = server.path + "/sites" + "/" + site.name
-			site.uri = "/" + site.name + "/"
+			site.path = server.path + "/sites/" + site.name
+			site.uri = "/" + site.name
 			site.server = server
+
+			builder, ok := server.siteBuilders[site.name]
+			if ok {
+				site.builder = builder
+			} else {
+				site.builder = server.siteBuilders["."]
+			}
 			site.Build()
 
 			server.sites[site.name] = site
@@ -66,10 +80,23 @@ func (server *Server) Start() {
 	server.http = mux
 	server.sites = make(map[string]*Site)
 	server.mutex = &sync.Mutex{}
+
+	server.SetupSiteBuilders()
+
+	var hashKey = []byte(securecookie.GenerateRandomKey(16))
+	var blockKey = []byte(securecookie.GenerateRandomKey(16))
+	server.jar = securecookie.New(hashKey, blockKey)
+
 	mux.Handle("/", server)
 
 	if err := http.ListenAndServe(server.host, server.http); err != nil {
 		fmt.Println("Unable to start server")
 		fmt.Println(err)
 	}
+}
+
+func (server *Server) SetupSiteBuilders() {
+	server.siteBuilders = make(map[string]SiteBuilder)
+	server.siteBuilders["."] = new(CommonSiteBuilder)
+	server.siteBuilders["_auth"] = new(AuthSiteBuilder)
 }

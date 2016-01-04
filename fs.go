@@ -25,15 +25,15 @@ func Stat(path string) *SiteMeta {
 	return nil
 }
 
-func IsExists(path string) (bool, error) {
+func IsExists(path string) bool {
 	_, err := os.Stat(path)
 	if err == nil {
-		return true, nil
+		return true
 	}
 	if os.IsNotExist(err) {
-		return false, nil
+		return false
 	}
-	return true, err
+	return true
 }
 
 func ReadContent(path string) []byte {

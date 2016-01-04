@@ -1,3 +1,9 @@
 [submodule "lib/metal"]
 	path = lib/metal
 	url = https://github.com/kirubasankars/metal.git
+[submodule "lib/yaml"]
+	path = lib/yaml
+	url = https://github.com/go-yaml/yaml.git
+[submodule "lib/securecookie"]
+	path = lib/securecookie
+	url = https://github.com/gorilla/securecookie.git
