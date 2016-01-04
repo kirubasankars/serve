@@ -5,15 +5,13 @@ import (
 	"strings"
 )
 
-type FileServe struct {
-	site *Site
+type FileHandler struct {
 }
 
-func (fileServe *FileServe) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var site = fileServe.site
+func (handler *FileHandler) ServeHTTP(site *Site, w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(r.URL.Path, site.uri)
 	filePath := ""
-	appDir, _ := IsExists(site.path + "/app")
+	appDir := IsExists(site.path + "/app")
 	if appDir {
 		filePath = site.path + "/app/" + parts[1]
 	} else {
