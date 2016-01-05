@@ -6,7 +6,7 @@ import (
 )
 
 type AuthSiteHandler struct {
-	FileHandler
+	FileHandler	
 }
 
 func (handler *AuthSiteHandler) ServeHTTP(site *Site, w http.ResponseWriter, r *http.Request) {
