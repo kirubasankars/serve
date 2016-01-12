@@ -1,13 +1,14 @@
-package main
+package serve
 
 import (
 	"fmt"
 	"net/http"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"sync"
 
-	"github.com/serve/lib/securecookie"
+	"github.com/gorilla/securecookie"
 )
 
 type Server struct {
@@ -16,9 +17,10 @@ type Server struct {
 
 	sites map[string]*Site
 	http  *http.ServeMux
-	mutex *sync.Mutex
+	IO    ServeHandler
 
-	jar *securecookie.SecureCookie
+	mutex *sync.Mutex
+	jar   *securecookie.SecureCookie
 
 	siteBuilders map[string]SiteBuilder
 }
@@ -37,21 +39,19 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	mux := server.http
 	re := regexp.MustCompile("^/\\w+")
-	path := re.FindString(r.URL.Path)
-	appPath := server.path + "/sites" + path
+	path := strings.TrimPrefix(re.FindString(r.URL.Path), "/")
+	appPath := server.path + "/www/" + path
 
-	f := Stat(appPath)
-
-	if f != nil {
+	if server.IO.IsSitePath(appPath) {
 
 		server.mutex.Lock()
 		defer server.mutex.Unlock()
 
-		if _, p := server.sites[f.Name]; p == false {
+		if _, p := server.sites[path]; p == false {
 
 			site := new(Site)
-			site.name = f.Name
-			site.path = server.path + "/sites/" + site.name
+			site.name = path
+			site.path = server.path + "/www/" + site.name
 			site.uri = "/" + site.name
 			site.server = server
 
