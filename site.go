@@ -1,11 +1,9 @@
-package main
+package serve
 
 import (
 	"log"
 	"net/http"
 	"time"
-
-	"github.com/serve/lib/metal"
 )
 
 type Site struct {
@@ -15,6 +13,27 @@ type Site struct {
 
 	server  *Server
 	builder SiteBuilder
+}
+
+func (site *Site) Build() {
+	site.builder.Build(site)
+}
+
+func (site *Site) Path() string {
+	return site.path
+}
+
+func (site *Site) Name() string {
+	return site.path
+}
+
+func (site *Site) SetupHandler(pattern string, handler HttpHandler) {
+	http := site.server.http
+	http.Handle(pattern, &SiteHandler{site: site, handler: handler})
+}
+
+func (site *Site) IsAuthEnabled() bool {
+	return site.server.IO.IsExists(site.path + "/_auth")
 }
 
 type HttpHandler interface {
@@ -30,7 +49,7 @@ func (sitehandler *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	site := sitehandler.site
 	t1 := time.Now()
 
-	if IsExists(site.path + "/_auth") {
+	if site.IsAuthEnabled() {
 		if cookie, err := r.Cookie("_auth"); err == nil {
 			value := make(map[string]string)
 			if err = site.server.jar.Decode("_auth", cookie.Value, &value); err == nil {
@@ -47,20 +66,4 @@ func (sitehandler *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 	t2 := time.Now()
 	log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), t2.Sub(t1))
-}
-
-func (site *Site) Build() {
-	site.builder.Build(site)
-}
-
-func (site *Site) SetupHandler(pattern string, handler HttpHandler) {
-	site.server.http.Handle(pattern, &SiteHandler{site: site, handler: handler})
-}
-
-func (site *Site) Model(path string) *metal.Metal {
-	model := metal.NewMetal()
-	var apiPath = site.path + "/api" + path
-	var data = ReadContent(apiPath + ".json")
-	model.Parse(data)
-	return model
 }
