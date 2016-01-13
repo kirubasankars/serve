@@ -7,7 +7,8 @@ import (
 	"regexp"
 	"strings"
 	"sync"
-
+	"os"
+	 
 	"github.com/gorilla/securecookie"
 )
 
@@ -89,6 +90,10 @@ func (server *Server) Start() {
 
 	mux.Handle("/", server)
 
+	server.host = os.Getenv("IP") + ":" + os.Getenv("PORT")
+	
+	fmt.Println(server.host)
+	
 	if err := http.ListenAndServe(server.host, server.http); err != nil {
 		fmt.Println("Unable to start server")
 		fmt.Println(err)

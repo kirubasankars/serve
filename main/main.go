@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"serve/serve"
+	"serve"
 )
 
 var port = flag.Int("port", 3000, "port number to listen")
@@ -27,8 +27,11 @@ func main() {
 		return
 	}
 
+
+	dir = "/home/ubuntu/workspace/src"
+
 	var server = new(serve.Server)
-	server.IO = new(FileIO)
+	server.IO = new(serve.FileIO)
 	server.SetConfig(dir, strconv.Itoa(*port))
 	server.Start()
 }

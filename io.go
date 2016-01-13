@@ -1,13 +1,13 @@
-package main
+package serve
 
 import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"serve/serve"
 	"strings"
+	"fmt"
 
-	"github.com/kirubasankars/gravity"
+	//"github.com/kirubasankars/gravity"
 	"github.com/kirubasankars/metal"
 )
 
@@ -36,11 +36,12 @@ func (fs *FileIO) IsExists(path string) bool {
 }
 
 func (fs *FileIO) ServeFile(w http.ResponseWriter, r *http.Request, path string) {
+	fmt.Println(path)
 	http.ServeFile(w, r, path)
 }
 
-func (fs *FileIO) API(site *serve.Site, method string, path string, input *metal.Metal) *metal.Metal {
-	g := gravity.NewGravity()
+func (fs *FileIO) API(site *Site, method string, path string, input *metal.Metal) *metal.Metal {
+	//g := gravity.NewGravity()
 	var data []byte
 	if data, _ = ioutil.ReadFile(site.Path() + "/api/" + path + "/" + strings.ToLower(method) + ".json"); data != nil {
 		m := metal.NewMetal()
