@@ -7,6 +7,7 @@ import (
 	"serve/serve"
 	"strings"
 
+	"github.com/kirubasankars/gravity"
 	"github.com/kirubasankars/metal"
 )
 
@@ -38,14 +39,8 @@ func (fs *FileIO) ServeFile(w http.ResponseWriter, r *http.Request, path string)
 	http.ServeFile(w, r, path)
 }
 
-// func API(site *serve.Site, method string, path string, input *metal.Metal) {
-// 	fmt.Println(path)
-// 	req, _ := http.NewRequest(method, "http://localhost:5984/test/_design/type/_view/"+path+"?include_docs=true", nil)
-// 	client := &http.Client{}
-// 	res, err := client.Do(req)
-// }
-
 func (fs *FileIO) API(site *serve.Site, method string, path string, input *metal.Metal) *metal.Metal {
+	g := gravity.NewGravity()
 	var data []byte
 	if data, _ = ioutil.ReadFile(site.Path() + "/api/" + path + "/" + strings.ToLower(method) + ".json"); data != nil {
 		m := metal.NewMetal()
