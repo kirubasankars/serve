@@ -9,7 +9,8 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+	"path/filepath"
+	
 	"github.com/kirubasankars/serve/driver"
 	"github.com/kirubasankars/serve/metal"
 	"github.com/kirubasankars/serve/serve"
@@ -64,8 +65,8 @@ func TestServeHttp(t *testing.T) {
 		m.Set("modules.@0", "module")
 		return m
 	}
-	stat := func(path string) bool {
-		if path == "/serve" || path == "/serve/apps/app" || path == "/serve/modules/module" {
+	stat := func(path string) bool {		
+		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/apps/app") || path == filepath.FromSlash("/serve/modules/module") {
 			return true
 		}
 		return false
@@ -96,8 +97,8 @@ func TestServeHttpModuleRootRedirect(t *testing.T) {
 		m.Set("modules.@0", "module")
 		return m
 	}
-	stat := func(path string) bool {
-		if path == "/serve" || path == "/serve/modules/module" {
+	stat := func(path string) bool {		
+		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/modules/module") {
 			return true
 		}
 		return false
@@ -127,7 +128,7 @@ func TestServeHttpAppModuleRootRedirect(t *testing.T) {
 		return m
 	}
 	stat := func(path string) bool {
-		if path == "/serve" || path == "/serve/apps/app" || path == "/serve/modules/module" {
+		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/apps/app") || path == filepath.FromSlash("/serve/modules/module") {
 			return true
 		}
 		return false
@@ -153,7 +154,7 @@ func TestServeHttpAppModuleRoot(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	stat := func(path string) bool {
-		if path == "/serve" || path == "/serve/apps/app" || path == "/serve/modules/module" {
+		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/apps/app") || path == filepath.FromSlash("/serve/modules/module") {
 			return true
 		}
 		return false
@@ -192,7 +193,7 @@ func TestServeHttpModuleRoot(t *testing.T) {
 		return m
 	}
 	stat := func(path string) bool {
-		if path == "/serve" || path == "/serve/modules/module" {
+		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/modules/module") {
 			return true
 		}
 		return false
@@ -222,7 +223,7 @@ func TestServeHttpApp(t *testing.T) {
 		return nil
 	}
 	stat := func(path string) bool {
-		if path == "/serve" || path == "/serve/apps/app" || path == "/serve/modules/home" {
+		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/apps/app") || path == filepath.FromSlash("/serve/modules/home") {
 			return true
 		}
 		return false
@@ -249,13 +250,13 @@ func TestServeHttpNamespaceAppNamespaceModuleRoot(t *testing.T) {
 	w := httptest.NewRecorder()
 	stat := func(path string) bool {
 		//fmt.Println(path)
-		if path == "/serve/namespace" || path == "/serve/namespace/apps/app" || path == "/serve/namespace/modules/module" {
+		if path == filepath.FromSlash("/serve/namespace") || path == filepath.FromSlash("/serve/namespace/apps/app") || path == filepath.FromSlash("/serve/namespace/modules/module") {
 			return true
 		}
 		return false
 	}
 	getConfig := func(path string) *metal.Metal {
-		if path == "/serve/namespace" {
+		if path == filepath.FromSlash("/serve/namespace") {
 			m := metal.NewMetal()
 			m.Set("modules.@0", "module")
 			return m
@@ -285,13 +286,13 @@ func TestServeHttpNamespaceModuleRoot(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	getConfig := func(path string) *metal.Metal {
-		if path == "/serve/namespace" {
+		if path == filepath.FromSlash("/serve/namespace") {
 			m := metal.NewMetal()
 			m.Set("modules.@0", "module")
 			m.Set("roles.adminstrator.@0", "check:admin")
 			return m
 		}
-		if path == "/serve/modules/module" {
+		if path == filepath.FromSlash("/serve/modules/module") {
 			m := metal.NewMetal()
 			m.Set("modules.@0", "module")
 			m.Set("permissions.admin.@0", "url(GET:path.to.file)")
@@ -301,7 +302,7 @@ func TestServeHttpNamespaceModuleRoot(t *testing.T) {
 	}
 
 	stat := func(path string) bool {
-		if path == "/serve/namespace" || path == "/serve/modules/module" {
+		if path == filepath.FromSlash("/serve/namespace") || path == filepath.FromSlash("/serve/modules/module") {
 			return true
 		}
 		return false
@@ -328,14 +329,14 @@ func TestServeHttpNamespcaeAppModuleRootRedirect(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	stat := func(path string) bool {
-		if path == "/serve/namespace" || path == "/serve/namespace/apps/app" || path == "/serve/modules/module" {
+		if path == filepath.FromSlash("/serve/namespace") || path == filepath.FromSlash("/serve/namespace/apps/app") || path == filepath.FromSlash("/serve/modules/module") {
 			return true
 		}
 		return false
 	}
 
 	getConfig := func(path string) *metal.Metal {
-		if path == "/serve/namespace" {
+		if path == filepath.FromSlash("/serve/namespace") {
 			m := metal.NewMetal()
 			m.Set("modules.@0", "module")
 			return m
