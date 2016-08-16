@@ -1,5 +1,7 @@
 package serve
 
+import "net/http"
+
 // Context for serve
 type Context struct {
 	Server      *Server
@@ -49,14 +51,17 @@ func (ctx *Context) GetConfig(key string) interface{} {
 }
 
 // NewContext for create new context
-func newContext(server *Server, url string) *Context {
-
+func newContext(server *Server, r *http.Request) *Context {
 	ctx := new(Context)
+	url := r.URL.Path
 	ctx.URL = url
 	ctx.Server = server
 
 	system := server.System
 	system.Build(ctx, url)
+
+	auth := new(authenticator)
+	auth.Validate(ctx, r)
 
 	return ctx
 }

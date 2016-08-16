@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"strings"
+	//	"strings"
 	"sync"
 	"time"
 )
@@ -48,14 +48,7 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := newContext(server, url)
-	if ctx.Module != nil {
-		authString := r.Method + ":" + ctx.Module.Name + strings.Replace(ctx.Path, "/", ".", -1)
-		if ctx.Namespace.ValidateURL(ctx, authString) == false {
-			w.WriteHeader(403)
-			return
-		}
-	}
+	ctx := newContext(server, r)
 
 	if ctx == nil || ctx.Module == nil {
 		http.NotFound(w, r)

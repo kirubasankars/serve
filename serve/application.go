@@ -8,6 +8,8 @@ type Application struct {
 	Path   string
 	config *metal.Metal
 
+	roles map[string][]string
+
 	server *Server
 }
 
@@ -21,7 +23,25 @@ func (app *Application) GetConfig(key string) interface{} {
 
 // Build build application
 func (app *Application) Build() {
-
+	if roles, _ := app.GetConfig("roles").(*metal.Metal); roles != nil {
+		props := roles.Properties()
+		if app.roles == nil {
+			app.roles = make(map[string][]string, len(props))
+		}
+		appRoles := app.roles
+		for name := range props {
+			if role, done := roles.Get(name).(*metal.Metal); done == true {
+				for _, v := range role.Properties() {
+					if auth, done := v.(string); done == true {
+						if _, p := appRoles[name]; p == true {
+							appRoles[name] = make([]string, 0)
+						}
+						appRoles[name] = append(appRoles[name], auth)
+					}
+				}
+			}
+		}
+	}
 }
 
 // NewApplication create application

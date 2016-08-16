@@ -1,7 +1,6 @@
 package serve
 
 import (
-	"regexp"
 	"sync"
 
 	"github.com/kirubasankars/serve/metal"
@@ -50,41 +49,6 @@ func (ns *Namespace) Build() {
 			}
 		}
 	}
-}
-
-// le := len(auth)
-// if le > 4 && auth[0:4] == "url(" && auth[le-1:] == ")" {
-// 	if _, p := ns.authURL[name]; p == false {
-// 		ns.authURL[name] = make([]string, 0)
-// 	}
-// 	rr, _ := ns.authURL[name]
-// 	ns.authURL[name] = append(rr, auth[4:le-1])
-// }
-
-// ValidateURL validate URL
-func (ns *Namespace) ValidateURL(ctx *Context, authString string) bool {
-
-	if roles, _ := ns.GetConfig("roles").(*metal.Metal); roles != nil {
-		for r := range roles.Properties() {
-			if ctx.UserInRole(r) {
-				if role, done := roles.Get(r).(*metal.Metal); done == true {
-					for _, v := range role.Properties() {
-						if auth, done := v.(string); done == true {
-							le := len(auth)
-							if le > 4 && auth[0:4] == "url(" && auth[le-1:] == ")" {
-								r1 := auth[4 : le-1]
-								if p, _ := regexp.MatchString(r1, authString); p == true {
-									return true
-								}
-								return false
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return true
 }
 
 // NewNamespace create namespace

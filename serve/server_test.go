@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
-	"path/filepath"
-	
+
 	"github.com/kirubasankars/serve/driver"
 	"github.com/kirubasankars/serve/metal"
 	"github.com/kirubasankars/serve/serve"
@@ -61,11 +61,21 @@ func TestServeHttp(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	getConfig := func(path string) *metal.Metal {
-		m := metal.NewMetal()
-		m.Set("modules.@0", "module")
-		return m
+		if path == filepath.FromSlash("/serve") {
+			m := metal.NewMetal()
+			m.Set("modules.@0", "module")
+			m.Set("roles.admin.@0", "module:permission")
+			return m
+		}
+		if path == filepath.FromSlash("/serve/modules/module") {
+			m := metal.NewMetal()
+			m.Set("permissions.permission.@0", "admin")
+			m.Set("permissions.permission.@1", "url(GET /path/to/file)")
+			return m
+		}
+		return nil
 	}
-	stat := func(path string) bool {		
+	stat := func(path string) bool {
 		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/apps/app") || path == filepath.FromSlash("/serve/modules/module") {
 			return true
 		}
@@ -93,11 +103,20 @@ func TestServeHttpModuleRootRedirect(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	getConfig := func(path string) *metal.Metal {
-		m := metal.NewMetal()
-		m.Set("modules.@0", "module")
-		return m
+		if path == filepath.FromSlash("/serve") {
+			m := metal.NewMetal()
+			m.Set("modules.@0", "module")
+			m.Set("roles.admin.@0", "module:permission")
+			return m
+		}
+		if path == filepath.FromSlash("/serve/modules/module") {
+			m := metal.NewMetal()
+			m.Set("permissions.permission.@1", "url(GET /?)")
+			return m
+		}
+		return nil
 	}
-	stat := func(path string) bool {		
+	stat := func(path string) bool {
 		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/modules/module") {
 			return true
 		}
@@ -289,13 +308,13 @@ func TestServeHttpNamespaceModuleRoot(t *testing.T) {
 		if path == filepath.FromSlash("/serve/namespace") {
 			m := metal.NewMetal()
 			m.Set("modules.@0", "module")
-			m.Set("roles.adminstrator.@0", "check:admin")
+			m.Set("roles.adminstrator.@0", "module:admin")
 			return m
 		}
 		if path == filepath.FromSlash("/serve/modules/module") {
 			m := metal.NewMetal()
 			m.Set("modules.@0", "module")
-			m.Set("permissions.admin.@0", "url(GET:path.to.file)")
+			m.Set("permissions.admin.@0", "url(GET /?)")
 			return m
 		}
 		return nil

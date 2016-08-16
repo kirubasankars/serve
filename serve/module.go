@@ -1,8 +1,9 @@
 package serve
 
 import (
-	"fmt"
 	"net/http"
+	"regexp"
+	"strings"
 
 	"github.com/kirubasankars/serve/metal"
 )
@@ -20,7 +21,8 @@ type Module struct {
 	AuthEnabled bool
 	Handlers    map[string]HTTPHandler
 
-	permissions map[string][]string
+	permissions     map[string][]string
+	permittedRoutes map[string]*regexp.Regexp
 
 	mux    *http.ServeMux
 	server *Server
@@ -46,18 +48,29 @@ func (module *Module) Build() {
 
 		for name := range props {
 			if permission, done := permissions.Get(name).(*metal.Metal); done == true {
+				exp := ""
 				for _, v := range permission.Properties() {
 					if auth, done := v.(string); done == true {
-						if _, p := module.permissions[name]; p == true {
-							module.permissions[name] = make([]string, 0)
+						le := len(auth)
+						if le > 6 && auth[0:4] == "url(" && auth[le-1:] == ")" {
+							exp += "^(" + auth[4:le-1] + ")$|"
+						} else {
+							if _, p := module.permissions[name]; p == false {
+								module.permissions[name] = make([]string, 0)
+							}
+							module.permissions[name] = append(module.permissions[name], auth)
 						}
-						module.permissions[name] = append(module.permissions[name], auth)
 					}
+				}
+				exp = strings.TrimSuffix(exp, "|")
+				if len(exp) > 0 {
+					if module.permittedRoutes == nil {
+						module.permittedRoutes = make(map[string]*regexp.Regexp)
+					}
+					module.permittedRoutes[name] = regexp.MustCompile(exp)
 				}
 			}
 		}
-
-		fmt.Println(module.permissions)
 	}
 
 	if provider, p := server.moduleProvider["."]; p {
