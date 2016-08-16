@@ -15,17 +15,6 @@ type Context struct {
 	Path string
 }
 
-// UserInRole check weather user part this role
-func (ctx *Context) UserInRole(role string) bool {
-	roles := *ctx.User.Roles
-	for idx := range roles {
-		if role == roles[idx] {
-			return true
-		}
-	}
-	return false
-}
-
 // GetConfig get config data from module/app/namespace/server
 func (ctx *Context) GetConfig(key string) interface{} {
 
@@ -56,6 +45,7 @@ func newContext(server *Server, r *http.Request) *Context {
 	url := r.URL.Path
 	ctx.URL = url
 	ctx.Server = server
+	ctx.User = newUser("")
 
 	system := server.System
 	system.Build(ctx, url)

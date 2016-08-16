@@ -1,13 +1,14 @@
 package driver
 
 import (
+	_ "fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
-_	"fmt"
+
 	"github.com/kirubasankars/serve/metal"
 	"github.com/kirubasankars/serve/serve"
 )
@@ -48,18 +49,18 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 	urlLen := len(parts) - 1
 	l := 1
 	currentIdx := 1
-	
+
 	if ctx.Namespace == nil {
 		if currentIdx <= urlLen {
 			fs.GetNamespace(ctx, parts[currentIdx])
 		}
-		
-		if ctx.Namespace != nil {			
+
+		if ctx.Namespace != nil {
 			currentIdx++
 			l += len(ctx.Namespace.Name)
-		} else {		
-			fs.GetNamespace(ctx, ".")			
-		}		
+		} else {
+			fs.GetNamespace(ctx, ".")
+		}
 	}
 
 	if ctx.Application == nil {
@@ -111,11 +112,10 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 
 	if l == 1 {
 		l = 0
-	}	
+	}
 
 	ctx.Path = uri[l:]
-
-	//fmt.Println(ctx.Namespace, ctx.Application, ctx.Module, ctx.Path)
+	ctx.User.Roles = append(ctx.User.Roles, "admin")
 }
 
 // GetNamespace dad
@@ -139,8 +139,8 @@ func (fs *FileSystem) GetNamespace(ctx *serve.Context, name string) {
 		return
 	}
 
-	loc := filepath.Join(ctx.Server.Path(), name)		
-	if fs.stat(loc) {		
+	loc := filepath.Join(ctx.Server.Path(), name)
+	if fs.stat(loc) {
 		ns := serve.NewNamespace(name, name, fs.getConfig(loc), server)
 		ns.Build()
 		server.Namespaces[name] = ns

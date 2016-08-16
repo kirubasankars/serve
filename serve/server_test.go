@@ -308,7 +308,7 @@ func TestServeHttpNamespaceModuleRoot(t *testing.T) {
 		if path == filepath.FromSlash("/serve/namespace") {
 			m := metal.NewMetal()
 			m.Set("modules.@0", "module")
-			m.Set("roles.adminstrator.@0", "module:admin")
+			m.Set("roles.admin.@0", "module:admin")
 			return m
 		}
 		if path == filepath.FromSlash("/serve/modules/module") {
