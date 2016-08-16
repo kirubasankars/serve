@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
+_	"fmt"
 	"github.com/kirubasankars/serve/metal"
 	"github.com/kirubasankars/serve/serve"
 )
@@ -48,22 +48,19 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 	urlLen := len(parts) - 1
 	l := 1
 	currentIdx := 1
-
-	//fmt.Println(parts, urlLen, l, currentIdx)
-
+	
 	if ctx.Namespace == nil {
 		if currentIdx <= urlLen {
 			fs.GetNamespace(ctx, parts[currentIdx])
 		}
-		if ctx.Namespace != nil {
+		
+		if ctx.Namespace != nil {			
 			currentIdx++
 			l += len(ctx.Namespace.Name)
-		} else {
-			fs.GetNamespace(ctx, ".")
-		}
+		} else {		
+			fs.GetNamespace(ctx, ".")			
+		}		
 	}
-
-	//fmt.Println(parts, urlLen, l, currentIdx)
 
 	if ctx.Application == nil {
 		if currentIdx <= urlLen {
@@ -112,13 +109,9 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 		}
 	}
 
-	//fmt.Println(parts, urlLen, l, currentIdx)
-
 	if l == 1 {
 		l = 0
-	}
-
-	//fmt.Println(uri, l)
+	}	
 
 	ctx.Path = uri[l:]
 
@@ -146,8 +139,8 @@ func (fs *FileSystem) GetNamespace(ctx *serve.Context, name string) {
 		return
 	}
 
-	loc := filepath.Join(ctx.Server.Path(), name)
-	if fs.stat(loc) {
+	loc := filepath.Join(ctx.Server.Path(), name)		
+	if fs.stat(loc) {		
 		ns := serve.NewNamespace(name, name, fs.getConfig(loc), server)
 		ns.Build()
 		server.Namespaces[name] = ns
