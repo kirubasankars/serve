@@ -89,7 +89,7 @@ func TestServeHttp(t *testing.T) {
 
 	//fmt.Printf("%d - %s", w.Code, w.Body.String())
 
-	if !(w.Code == 200 || strings.TrimSpace(w.Body.String()) != ". app module") {
+	if !(w.Code == 200 || strings.TrimSpace(w.Body.String()) == ". app module") {
 		t.Error("return code is not 200")
 	}
 }

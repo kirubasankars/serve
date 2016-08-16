@@ -30,6 +30,7 @@ func (auth *authenticator) Validate(ctx *Context, request *http.Request) bool {
 
 	if roles != nil {
 		for _, v := range ctx.User.Roles {
+
 			if role, done := roles[v]; done == true {
 				for _, auth := range role {
 					parts := strings.Split(auth, ":")

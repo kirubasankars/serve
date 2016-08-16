@@ -49,8 +49,8 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := newContext(server, r)
-
 	if ctx == nil || ctx.Module == nil {
+		fmt.Println(r.URL.Path)
 		http.NotFound(w, r)
 		return
 	}
