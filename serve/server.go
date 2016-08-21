@@ -15,7 +15,7 @@ type Server struct {
 	port string
 	path string
 
-	mux    *http.ServeMux
+	Mux    *http.ServeMux
 	System System
 
 	Namespaces     map[string]*Namespace
@@ -32,7 +32,7 @@ func (server *Server) Path() string {
 
 // Start new server
 func (server *Server) Start() {
-	if err := http.ListenAndServe("localhost:"+server.port, server.mux); err != nil {
+	if err := http.ListenAndServe("localhost:"+server.port, server.Mux); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -69,8 +69,9 @@ func NewServer(port string, rootPath string, driver System) *Server {
 	server.path = rootPath
 	server.System = driver
 
-	server.mux = http.NewServeMux()
-	server.mux.Handle("/", server)
+	server.Mux = http.NewServeMux()
+	server.Mux.Handle("/oauth2/token", new(OAuth))
+	server.Mux.Handle("/", server)
 
 	server.moduleProvider = make(map[string]ModuleHandlerProvider)
 	server.Namespaces = make(map[string]*Namespace)
@@ -88,6 +89,5 @@ func (server *Server) RegisterProvider(name string, provider ModuleHandlerProvid
 // ServeFile serve file
 func (server *Server) ServeFile(w http.ResponseWriter, r *http.Request, file string) {
 	path := filepath.Join(server.Path(), file)
-	//fmt.Println(path)
 	http.ServeFile(w, r, path)
 }
