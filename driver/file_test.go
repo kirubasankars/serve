@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/kirubasankars/serve/driver"
-	"github.com/kirubasankars/serve/metal"
 	"github.com/kirubasankars/serve/serve"
 )
 
@@ -90,11 +89,10 @@ import (
 // }
 
 func TestBuildRedirectApp(t *testing.T) {
-	getConfig := func(path string) *metal.Metal {
+	getConfig := func(path string) *[]byte {
 		if path == "/serve/apps/app" {
-			m := metal.NewMetal()
-			m.Set("modules.@0", "home")
-			return m
+			ba := []byte("{ \"modules\" : [\"home\"] }")
+			return &ba
 		}
 		return nil
 	}

@@ -1,12 +1,10 @@
 package driver
 
 import (
-	_ "fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/kirubasankars/serve/metal"
@@ -22,7 +20,7 @@ const MODULES string = "modules"
 var re = regexp.MustCompile("[^A-Za-z0-9/.]+")
 
 type statFunction func(path string) bool
-type getConfigFunction func(path string) *metal.Metal
+type getConfigFunction func(path string) *[]byte
 
 // FileSystem dads
 type FileSystem struct {
@@ -79,19 +77,26 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 
 	if ctx.Module == nil {
 
+		var modules []string
+		if ctx.Application != nil && ctx.Application.Config != nil {
+			modules = ctx.Application.Config.Modules[:]
+		}
+		if modules != nil && ctx.Namespace.Config != nil {
+			modules = append(modules, ctx.Namespace.Config.Modules...)
+		} else {
+			if ctx.Namespace.Config != nil && ctx.Namespace.Config.Modules != nil {
+				modules = ctx.Namespace.Config.Modules
+			}
+		}
+
 		if currentIdx <= urlLen {
 			name := parts[currentIdx]
 
-			if ctx.GetConfig("modules") != nil {
-				l, _ := ctx.GetConfig("modules.$length").(int)
-				for i := 0; i < l; i++ {
-					mname, _ := ctx.GetConfig("modules.@" + strconv.Itoa(i)).(string)
-					if mname == name {
-						fs.GetModule(ctx, name)
-					}
+			for idx := range modules {
+				if modules[idx] == name {
+					fs.GetModule(ctx, name)
 				}
 			}
-
 		}
 
 		if ctx.Module != nil {
@@ -101,9 +106,8 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 			currentIdx++
 			l += len(ctx.Module.Name)
 		} else {
-			if ctx.GetConfig("modules.@0") != nil {
-				name, _ := ctx.GetConfig("modules.@0").(string)
-				fs.GetModule(ctx, name)
+			if len(modules) >= 1 {
+				fs.GetModule(ctx, modules[0])
 			} else {
 				fs.GetModule(ctx, "home")
 			}
@@ -209,13 +213,14 @@ func (fs *FileSystem) GetModule(ctx *serve.Context, name string) {
 	loc := filepath.Join(server.Path(), path)
 	if fs.stat(loc) {
 		modules[name] = serve.NewModule(name, path, fs.getConfig(loc), server)
-	} else {
-		path = filepath.Join(MODULES, name)
-		loc = filepath.Join(server.Path(), path)
-		if fs.stat(loc) {
-			modules[name] = serve.NewModule(name, path, fs.getConfig(loc), server)
-		}
 	}
+	// else {
+	// 	path = filepath.Join(MODULES, name)
+	// 	loc = filepath.Join(server.Path(), path)
+	// 	if fs.stat(loc) {
+	// 		modules[name] = serve.NewModule(name, path, fs.getConfig(loc), server)
+	// 	}
+	// }
 
 	module = modules[name]
 	if module != nil {

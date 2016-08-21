@@ -18,23 +18,23 @@ type Context struct {
 // GetConfig get config data from module/app/namespace/server
 func (ctx *Context) GetConfig(key string) interface{} {
 
-	if module := ctx.Module; module != nil {
-		if value := module.GetConfig(key); value != nil {
-			return value
-		}
-	}
+	// if module := ctx.Module; module != nil {
+	// 	if value := module.GetConfig(key); value != nil {
+	// 		return value
+	// 	}
+	// }
+	//
+	// if app := ctx.Application; app != nil {
+	// 	if value := app.GetConfig(key); value != nil {
+	// 		return value
+	// 	}
+	// }
 
-	if app := ctx.Application; app != nil {
-		if value := app.GetConfig(key); value != nil {
-			return value
-		}
-	}
-
-	if ns := ctx.Namespace; ns != nil {
-		if value := ns.GetConfig(key); value != nil {
-			return value
-		}
-	}
+	// if ns := ctx.Namespace; ns != nil {
+	// 	if value := ns.GetConfig(key); value != nil {
+	// 		return value
+	// 	}
+	// }
 
 	return nil
 }

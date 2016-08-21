@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/kirubasankars/serve/driver"
-	"github.com/kirubasankars/serve/metal"
 	"github.com/kirubasankars/serve/serve"
 )
 
@@ -60,18 +59,14 @@ func TestServeHttp(t *testing.T) {
 	}
 
 	w := httptest.NewRecorder()
-	getConfig := func(path string) *metal.Metal {
+	getConfig := func(path string) *[]byte {
 		if path == filepath.FromSlash("/serve") {
-			m := metal.NewMetal()
-			m.Set("modules.@0", "module")
-			m.Set("roles.admin.@0", "module:permission")
-			return m
+			b := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:permission\"] } }")
+			return &b
 		}
 		if path == filepath.FromSlash("/serve/modules/module") {
-			m := metal.NewMetal()
-			m.Set("permissions.permission.@0", "admin")
-			m.Set("permissions.permission.@1", "url(GET /path/to/file)")
-			return m
+			b := []byte("{ \"permissions\" : { \"permission\" : [\"admin\",\"url(GET /path/to/file)\"] } }")
+			return &b
 		}
 		return nil
 	}
@@ -102,17 +97,14 @@ func TestServeHttpModuleRootRedirect(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	getConfig := func(path string) *metal.Metal {
+	getConfig := func(path string) *[]byte {
 		if path == filepath.FromSlash("/serve") {
-			m := metal.NewMetal()
-			m.Set("modules.@0", "module")
-			m.Set("roles.admin.@0", "module:permission")
-			return m
+			b := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:permission\"] } }")
+			return &b
 		}
 		if path == filepath.FromSlash("/serve/modules/module") {
-			m := metal.NewMetal()
-			m.Set("permissions.permission.@1", "url(GET /?)")
-			return m
+			b := []byte("{ \"permissions\" : { \"permission\" : [\"url(GET /?)\"] } }")
+			return &b
 		}
 		return nil
 	}
@@ -141,10 +133,9 @@ func TestServeHttpAppModuleRootRedirect(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	getConfig := func(path string) *metal.Metal {
-		m := metal.NewMetal()
-		m.Set("modules.@0", "module")
-		return m
+	getConfig := func(path string) *[]byte {
+		ba := []byte("{ \"modules\" : [\"module\"] }")
+		return &ba
 	}
 	stat := func(path string) bool {
 		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/apps/app") || path == filepath.FromSlash("/serve/modules/module") {
@@ -178,10 +169,9 @@ func TestServeHttpAppModuleRoot(t *testing.T) {
 		}
 		return false
 	}
-	getConfig := func(path string) *metal.Metal {
-		m := metal.NewMetal()
-		m.Set("modules.@0", "module")
-		return m
+	getConfig := func(path string) *[]byte {
+		ba := []byte("{ \"modules\" : [\"module\"] }")
+		return &ba
 	}
 
 	d := driver.NewFileSystem(stat, getConfig)
@@ -206,10 +196,9 @@ func TestServeHttpModuleRoot(t *testing.T) {
 	}
 
 	w := httptest.NewRecorder()
-	getConfig := func(path string) *metal.Metal {
-		m := metal.NewMetal()
-		m.Set("modules.@0", "module")
-		return m
+	getConfig := func(path string) *[]byte {
+		ba := []byte("{ \"modules\" : [\"module\"] }")
+		return &ba
 	}
 	stat := func(path string) bool {
 		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/modules/module") {
@@ -238,7 +227,7 @@ func TestServeHttpApp(t *testing.T) {
 	}
 
 	w := httptest.NewRecorder()
-	getConfig := func(path string) *metal.Metal {
+	getConfig := func(path string) *[]byte {
 		return nil
 	}
 	stat := func(path string) bool {
@@ -268,17 +257,15 @@ func TestServeHttpNamespaceAppNamespaceModuleRoot(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	stat := func(path string) bool {
-		//fmt.Println(path)
 		if path == filepath.FromSlash("/serve/namespace") || path == filepath.FromSlash("/serve/namespace/apps/app") || path == filepath.FromSlash("/serve/namespace/modules/module") {
 			return true
 		}
 		return false
 	}
-	getConfig := func(path string) *metal.Metal {
+	getConfig := func(path string) *[]byte {
 		if path == filepath.FromSlash("/serve/namespace") {
-			m := metal.NewMetal()
-			m.Set("modules.@0", "module")
-			return m
+			ba := []byte("{ \"modules\" : [\"module\"] }")
+			return &ba
 		}
 		return nil
 	}
@@ -304,24 +291,20 @@ func TestServeHttpNamespaceModuleRoot(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	getConfig := func(path string) *metal.Metal {
+	getConfig := func(path string) *[]byte {
 		if path == filepath.FromSlash("/serve/namespace") {
-			m := metal.NewMetal()
-			m.Set("modules.@0", "module")
-			m.Set("roles.admin.@0", "module:admin")
-			return m
+			ba := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:admin\"] } }")
+			return &ba
 		}
 		if path == filepath.FromSlash("/serve/modules/module") {
-			m := metal.NewMetal()
-			m.Set("modules.@0", "module")
-			m.Set("permissions.admin.@0", "url(GET /?)")
-			return m
+			ba := []byte("{ \"permissions\" : { \"admin\" : [\"url(GET /?)\"] } }")
+			return &ba
 		}
 		return nil
 	}
 
 	stat := func(path string) bool {
-		if path == filepath.FromSlash("/serve/namespace") || path == filepath.FromSlash("/serve/modules/module") {
+		if path == filepath.FromSlash("/serve/namespace") || path == filepath.FromSlash("/serve/namespace/modules/module") {
 			return true
 		}
 		return false
@@ -348,17 +331,16 @@ func TestServeHttpNamespcaeAppModuleRootRedirect(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	stat := func(path string) bool {
-		if path == filepath.FromSlash("/serve/namespace") || path == filepath.FromSlash("/serve/namespace/apps/app") || path == filepath.FromSlash("/serve/modules/module") {
+		if path == filepath.FromSlash("/serve/namespace") || path == filepath.FromSlash("/serve/namespace/apps/app") || path == filepath.FromSlash("/serve/namespace/modules/module") {
 			return true
 		}
 		return false
 	}
 
-	getConfig := func(path string) *metal.Metal {
+	getConfig := func(path string) *[]byte {
 		if path == filepath.FromSlash("/serve/namespace") {
-			m := metal.NewMetal()
-			m.Set("modules.@0", "module")
-			return m
+			ba := []byte("{ \"modules\" : [\"module\"] }")
+			return &ba
 		}
 		return nil
 	}
