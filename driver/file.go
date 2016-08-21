@@ -120,6 +120,8 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 
 	ctx.Path = uri[l:]
 	ctx.User.Roles = append(ctx.User.Roles, "admin")
+
+	//fmt.Println(ctx.Module)
 }
 
 // GetNamespace dad

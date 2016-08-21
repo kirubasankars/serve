@@ -5,8 +5,7 @@ import (
 	"strings"
 )
 
-type authenticator struct {
-}
+type authenticator struct{}
 
 func (auth *authenticator) Validate(ctx *Context, request *http.Request) bool {
 
@@ -19,26 +18,29 @@ func (auth *authenticator) Validate(ctx *Context, request *http.Request) bool {
 	}
 
 	var roles map[string][]string
-	if application != nil {
-		roles = application.roles
+	if application != nil && application.Config != nil {
+		roles = application.Config.Roles
+	}
+	if namespace.Config != nil {
 		if roles == nil {
-			roles = namespace.roles
+			roles = make(map[string][]string)
 		}
-	} else {
-		roles = namespace.roles
+		nroles := namespace.Config.Roles
+		for k, v := range nroles {
+			roles[k] = v
+		}
 	}
 
 	if roles != nil {
-		for _, v := range ctx.User.Roles {
 
+		for _, v := range ctx.User.Roles {
 			if role, done := roles[v]; done == true {
 				for _, auth := range role {
 					parts := strings.Split(auth, ":")
 					if len(parts) == 2 {
 						permissionName := parts[1]
 						if module.Name == parts[0] {
-							exp := module.permittedRoutes[permissionName]
-							if exp.MatchString(request.Method + " " + ctx.Path) {
+							if exp, p := module.permittedRoutes[permissionName]; p == true && exp.MatchString(request.Method+" "+ctx.Path) {
 								return true
 							}
 						}
