@@ -4,12 +4,6 @@ import "net/http"
 
 type serveHandler struct{}
 
-var contexts map[*http.Request]*Context
-
-func init() {
-	contexts = make(map[*http.Request]*Context)
-}
-
 func (serveHandler *serveHandler) ServeHTTP(ctx Context, w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Module == nil {
@@ -26,10 +20,11 @@ func (serveHandler *serveHandler) ServeHTTP(ctx Context, w http.ResponseWriter, 
 }
 
 func (serveHandler *serveHandler) Serve(ctx Context, w http.ResponseWriter, r *http.Request) {
-	contexts[r] = &ctx
+	server := ctx.Server
+	server.contexts[r] = &ctx
 	fakeR, _ := http.NewRequest(r.Method, "/"+ctx.Module.Name+ctx.Path, nil)
 	handler, _ := ctx.Module.mux.Handler(fakeR)
 	fakeR.URL.Path = r.URL.Path
 	handler.ServeHTTP(w, r)
-	delete(contexts, r)
+	delete(server.contexts, r)
 }

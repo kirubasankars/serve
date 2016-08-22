@@ -72,10 +72,6 @@ func (module *Module) Build() {
 
 	mux := module.mux
 
-	// mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	http.Redirect(w, r, r.URL.Path+"/"+module.Name+"/", 301)
-	// })
-
 	for pattern, handler := range module.Handlers {
 
 		if pattern != "" {
@@ -83,8 +79,6 @@ func (module *Module) Build() {
 			mh.handler = handler
 			mh.module = module
 			uri := "/" + module.Name + pattern
-
-			//fmt.Println("/"+module.Name+pattern, "build")
 
 			mux.Handle(uri, mh)
 		}
@@ -101,9 +95,8 @@ type moduleHandler struct {
 }
 
 func (mh *moduleHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	//ctx := newContext(mh.module.server, r.URL.Path)
-	//fmt.Println(uri)
-	mh.handler(*contexts[r], w, r)
+	server := mh.module.server
+	mh.handler(*server.contexts[r], w, r)
 }
 
 // NewModule create module

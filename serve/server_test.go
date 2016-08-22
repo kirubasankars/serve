@@ -80,8 +80,7 @@ func TestServeHttp(t *testing.T) {
 	d := driver.NewFileSystem(stat, getConfig)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
-	h, _ := server.Mux.Handler(req)
-	h.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	//fmt.Printf("%d - %s", w.Code, w.Body.String())
 
@@ -118,8 +117,7 @@ func TestServeHttpModuleRootRedirect(t *testing.T) {
 
 	d := driver.NewFileSystem(stat, getConfig)
 	server := serve.NewServer("3000", "/serve", d)
-	h, _ := server.Mux.Handler(req)
-	h.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	if !(w.Code == 301 && strings.TrimSpace(w.Body.String()) == "<a href=\"/module/\">Moved Permanently</a>.") {
 		fmt.Printf("%d - %s", w.Code, w.Body.String())
@@ -155,8 +153,7 @@ func TestServeHttpAppModuleRootRedirect(t *testing.T) {
 	d := driver.NewFileSystem(stat, getConfig)
 
 	server := serve.NewServer("3000", "/serve", d)
-	h, _ := server.Mux.Handler(req)
-	h.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	//fmt.Printf("%d - %s", w.Code, w.Body.String())
 
@@ -195,9 +192,7 @@ func TestServeHttpAppModuleRoot(t *testing.T) {
 
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
-
-	h, _ := server.Mux.Handler(req)
-	h.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	//fmt.Printf("%d - %s", w.Code, w.Body)
 
@@ -234,8 +229,7 @@ func TestServeHttpModuleRoot(t *testing.T) {
 	d := driver.NewFileSystem(stat, getConfig)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
-	h, _ := server.Mux.Handler(req)
-	h.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	//fmt.Printf("%d - %s", w.Code, w.Body.String())
 
@@ -273,8 +267,7 @@ func TestServeHttpApp(t *testing.T) {
 	d := driver.NewFileSystem(stat, getConfig)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
-	h, _ := server.Mux.Handler(req)
-	h.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	//fmt.Printf("%d - %s", w.Code, w.Body.String())
 
@@ -311,9 +304,7 @@ func TestServeHttpNamespaceAppNamespaceModuleRoot(t *testing.T) {
 	d := driver.NewFileSystem(stat, getConfig)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
-
-	h, _ := server.Mux.Handler(req)
-	h.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	//fmt.Printf("%d - %s", w.Code, w.Body.String())
 
@@ -353,8 +344,7 @@ func TestServeHttpNamespaceModuleRoot(t *testing.T) {
 	d := driver.NewFileSystem(stat, getConfig)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
-	h, _ := server.Mux.Handler(req)
-	h.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	//fmt.Printf("%d - %s", w.Code, w.Body.String())
 
@@ -392,8 +382,7 @@ func TestServeHttpNamespcaeAppModuleRootRedirect(t *testing.T) {
 
 	d := driver.NewFileSystem(stat, getConfig)
 	server := serve.NewServer("3000", "/serve", d)
-	h, _ := server.Mux.Handler(req)
-	h.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	//fmt.Printf("%d - %s", w.Code, w.Body.String())
 
@@ -421,8 +410,7 @@ func TestServeHttpOAuth(t *testing.T) {
 	d := driver.NewFileSystem(stat, getConfig)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
-	h, _ := server.Mux.Handler(req)
-	h.ServeHTTP(w, req)
+	server.ServeHTTP(w, req)
 
 	fmt.Printf("%d - %s", w.Code, w.Body.String())
 

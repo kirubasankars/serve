@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	//	"strings"
 	"sync"
 	"time"
 )
@@ -15,7 +14,7 @@ type Server struct {
 	port string
 	path string
 
-	Mux    *http.ServeMux
+	mux    *http.ServeMux
 	System System
 
 	Namespaces     map[string]*Namespace
@@ -23,6 +22,8 @@ type Server struct {
 
 	serveHandler
 	sync.Mutex // <-- this mutex protects
+
+	contexts map[*http.Request]*Context
 }
 
 // Path get path
@@ -32,7 +33,7 @@ func (server *Server) Path() string {
 
 // Start new server
 func (server *Server) Start() {
-	if err := http.ListenAndServe("localhost:"+server.port, server.Mux); err != nil {
+	if err := http.ListenAndServe("localhost:"+server.port, server.mux); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -41,6 +42,16 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	t1 := time.Now()
 
+	handler, _ := server.mux.Handler(r)
+	handler.ServeHTTP(w, r)
+
+	t2 := time.Now()
+
+	log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), t2.Sub(t1))
+}
+
+// Serve serve
+func (server *Server) serve(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
 
 	if url == "/favicon.ico" {
@@ -56,10 +67,6 @@ func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	server.serveHandler.ServeHTTP(*ctx, w, r)
-
-	t2 := time.Now()
-
-	log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), t2.Sub(t1))
 }
 
 // NewServer for create new server
@@ -69,14 +76,15 @@ func NewServer(port string, rootPath string, driver System) *Server {
 	server.path = rootPath
 	server.System = driver
 
-	server.Mux = http.NewServeMux()
-	server.Mux.Handle("/", server)
+	server.mux = http.NewServeMux()
 
-	new(OAuth2).Register(server.Mux)
+	server.mux.HandleFunc("/", server.serve)
+	new(OAuth2).Register(server.mux)
+
+	server.contexts = make(map[*http.Request]*Context)
 
 	server.moduleProvider = make(map[string]ModuleHandlerProvider)
 	server.Namespaces = make(map[string]*Namespace)
-
 	server.RegisterProvider(".", new(commonHandlerBuilder))
 
 	return server
