@@ -1,10 +1,7 @@
 package serve
 
 // NamespaceConfigration config for namespace object
-type NamespaceConfigration struct {
-	Modules []string
-	Roles   map[string][]string
-}
+type NamespaceConfigration struct{}
 
 // ApplicationConfigration config for application object
 type ApplicationConfigration struct {

@@ -70,8 +70,9 @@ func NewServer(port string, rootPath string, driver System) *Server {
 	server.System = driver
 
 	server.Mux = http.NewServeMux()
-	server.Mux.Handle("/oauth2/token", new(OAuth))
 	server.Mux.Handle("/", server)
+
+	new(OAuth2).Register(server.Mux)
 
 	server.moduleProvider = make(map[string]ModuleHandlerProvider)
 	server.Namespaces = make(map[string]*Namespace)

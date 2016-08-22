@@ -16,17 +16,7 @@ type Namespace struct {
 
 	server     *Server
 	sync.Mutex // <-- this mutex protects
-
-	roles map[string][]string
 }
-
-// GetConfig get config from namespace
-// func (ns *Namespace) GetConfig(key string) interface{} {
-// 	if ns.config == nil {
-// 		return nil
-// 	}
-// 	return ns.config.Get(key)
-// }
 
 // Build builing namespace
 func (ns *Namespace) Build() {

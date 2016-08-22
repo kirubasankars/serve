@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kirubasankars/serve/metal"
 	"github.com/kirubasankars/serve/serve"
 )
 
@@ -65,36 +64,32 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 		if currentIdx <= urlLen {
 			fs.GetApplication(ctx, parts[currentIdx])
 		}
+
 		if ctx.Application != nil {
 			if currentIdx == 2 {
 				l++
 			}
-
 			currentIdx++
 			l += len(ctx.Application.Name)
+		} else {
+			fs.GetApplication(ctx, ".")
 		}
 	}
 
 	if ctx.Module == nil {
 
 		var modules []string
-		if ctx.Application != nil && ctx.Application.Config != nil {
-			modules = ctx.Application.Config.Modules[:]
-		}
-		if modules != nil && ctx.Namespace.Config != nil {
-			modules = append(modules, ctx.Namespace.Config.Modules...)
-		} else {
-			if ctx.Namespace.Config != nil && ctx.Namespace.Config.Modules != nil {
-				modules = ctx.Namespace.Config.Modules
-			}
+		appConfig := ctx.Application.Config
+		if appConfig != nil {
+			modules = appConfig.Modules
 		}
 
 		if currentIdx <= urlLen {
 			name := parts[currentIdx]
-
 			for idx := range modules {
 				if modules[idx] == name {
 					fs.GetModule(ctx, name)
+					break
 				}
 			}
 		}
@@ -119,9 +114,8 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 	}
 
 	ctx.Path = uri[l:]
+	//TODO ::
 	ctx.User.Roles = append(ctx.User.Roles, "admin")
-
-	//fmt.Println(ctx.Module)
 }
 
 // GetNamespace dad
@@ -147,7 +141,7 @@ func (fs *FileSystem) GetNamespace(ctx *serve.Context, name string) {
 
 	loc := filepath.Join(ctx.Server.Path(), name)
 	if fs.stat(loc) {
-		ns := serve.NewNamespace(name, name, fs.getConfig(loc), server)
+		ns := serve.NewNamespace(name, name, nil, server)
 		ns.Build()
 		server.Namespaces[name] = ns
 		ctx.Namespace = ns
@@ -176,7 +170,13 @@ func (fs *FileSystem) GetApplication(ctx *serve.Context, name string) {
 		return
 	}
 
-	path := filepath.Join(ctx.Namespace.Path, APPS, name)
+	var path string
+	if name == "." {
+		path = filepath.Join(ctx.Namespace.Path, name)
+	} else {
+		path = filepath.Join(ctx.Namespace.Path, APPS, name)
+	}
+
 	loc := filepath.Join(server.Path(), path)
 	if fs.stat(loc) {
 		app := serve.NewApplication(name, path, fs.getConfig(loc), server)
@@ -216,13 +216,6 @@ func (fs *FileSystem) GetModule(ctx *serve.Context, name string) {
 	if fs.stat(loc) {
 		modules[name] = serve.NewModule(name, path, fs.getConfig(loc), server)
 	}
-	// else {
-	// 	path = filepath.Join(MODULES, name)
-	// 	loc = filepath.Join(server.Path(), path)
-	// 	if fs.stat(loc) {
-	// 		modules[name] = serve.NewModule(name, path, fs.getConfig(loc), server)
-	// 	}
-	// }
 
 	module = modules[name]
 	if module != nil {
@@ -239,11 +232,9 @@ func (fs *FileSystem) GetModule(ctx *serve.Context, name string) {
 }
 
 //LoadConfig used for load config
-func LoadConfig(path string) *metal.Metal {
+func LoadConfig(path string) *[]byte {
 	if s, err := ioutil.ReadFile(filepath.Join(path, "config.json")); err == nil {
-		m := metal.NewMetal()
-		m.Parse(s)
-		return m
+		return &s
 	}
 	return nil
 }

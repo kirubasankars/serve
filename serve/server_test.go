@@ -53,7 +53,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestServeHttp(t *testing.T) {
-	req, err := http.NewRequest("GET", "http://localhost:3000/app/module/path/to/file", nil)
+	req, err := http.NewRequest("GET", "http://localhost:3000/path/to/file", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,17 +61,17 @@ func TestServeHttp(t *testing.T) {
 	w := httptest.NewRecorder()
 	getConfig := func(path string) *[]byte {
 		if path == filepath.FromSlash("/serve") {
-			b := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:permission\"] } }")
+			b := []byte("{ \"roles\" : { \"admin\" : [\"home:permission\"] } }")
 			return &b
 		}
-		if path == filepath.FromSlash("/serve/modules/module") {
+		if path == filepath.FromSlash("/serve/modules/home") {
 			b := []byte("{ \"permissions\" : { \"permission\" : [\"admin\",\"url(GET /path/to/file)\"] } }")
 			return &b
 		}
 		return nil
 	}
 	stat := func(path string) bool {
-		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/apps/app") || path == filepath.FromSlash("/serve/modules/module") {
+		if path == filepath.FromSlash("/serve") || path == filepath.FromSlash("/serve/apps/app") || path == filepath.FromSlash("/serve/modules/home") {
 			return true
 		}
 		return false
@@ -85,7 +85,7 @@ func TestServeHttp(t *testing.T) {
 
 	//fmt.Printf("%d - %s", w.Code, w.Body.String())
 
-	if !(w.Code == 200 || strings.TrimSpace(w.Body.String()) == ". app module") {
+	if !(w.Code == 200 && strings.TrimSpace(w.Body.String()) == ". . home") {
 		t.Error("return code is not 200")
 	}
 }
@@ -298,7 +298,7 @@ func TestServeHttpNamespaceAppNamespaceModuleRoot(t *testing.T) {
 		return false
 	}
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve/namespace") {
+		if path == filepath.FromSlash("/serve/namespace/apps/app") {
 			ba := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:permission\"] } }")
 			return &ba
 		}
@@ -358,7 +358,7 @@ func TestServeHttpNamespaceModuleRoot(t *testing.T) {
 
 	//fmt.Printf("%d - %s", w.Code, w.Body.String())
 
-	if w.Code != 200 || w.Body.String() != "namespace  module" {
+	if w.Code != 200 || w.Body.String() != "namespace . module" {
 		t.Logf("%d - %s", w.Code, w.Body.String())
 		t.Error("return code is not 301")
 	}
@@ -379,7 +379,7 @@ func TestServeHttpNamespcaeAppModuleRootRedirect(t *testing.T) {
 	}
 
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve/namespace") {
+		if path == filepath.FromSlash("/serve/namespace/apps/app") {
 			ba := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:admin\"] } }")
 			return &ba
 		}
@@ -404,7 +404,8 @@ func TestServeHttpNamespcaeAppModuleRootRedirect(t *testing.T) {
 }
 
 func TestServeHttpOAuth(t *testing.T) {
-	req, err := http.NewRequest("GET", "http://localhost:3000/oauth2/token", nil)
+	query := "?grant_type=password&client_id=client_id&client_secret=client_secret&username=admin&password=admin"
+	req, err := http.NewRequest("GET", "http://localhost:3000/oauth2/token"+query, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
