@@ -11,6 +11,7 @@ type OAuth2 struct{}
 // Authorize authorize
 func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
 	values := r.URL.Query()
+
 	if r.Method == "POST" {
 		r.ParseForm()
 
@@ -26,7 +27,7 @@ func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
 
 		if len(responseCode) == 1 && responseCode[0] == "code" {
 			if len(clientID) == 1 && len(redirectURI) == 1 && len(username) == 1 && len(password) == 1 {
-				if auth.Authenticate(AuthParameter{username: username[0], password: password[0], clientID: clientID[0], redirectURI: redirectURI[0]}) {
+				if auth.Authenticate(AuthParameter{username: username[0], password: password[0], clientID: clientID[0], redirectURI: redirectURI[0]}) >= 1 {
 					query := "?code=code"
 					if len(state) > 0 {
 						query += "&state=" + state[0]
@@ -38,7 +39,7 @@ func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
 
 		if len(responseCode) == 1 && responseCode[0] == "token" {
 			if len(clientID) == 1 && len(redirectURI) == 1 && len(username) == 1 && len(password) == 1 {
-				if auth.Authenticate(AuthParameter{username: username[0], password: password[0], clientID: clientID[0], redirectURI: redirectURI[0]}) {
+				if auth.Authenticate(AuthParameter{username: username[0], password: password[0], clientID: clientID[0], redirectURI: redirectURI[0]}) >= 1 {
 					query := "?access_token=access_token&expires_in=expires_in&refresh_token=refresh_token&issued_at=issued_at&signature=signature"
 					if len(state) > 0 {
 						query += "&state=" + state[0]
@@ -59,6 +60,7 @@ func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
 	values := r.URL.Query()
 	if r.Method == "POST" {
 		auth := new(Authentication)
+
 		grantType := values["grant_type"]
 		clientID := values["client_id"]
 		clientSecret := values["client_secret"]
@@ -67,11 +69,10 @@ func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
 			redirectURI := values["redirect_uri"]
 			code := values["code"]
 			if len(clientID) == 1 && len(clientSecret) == 1 && len(redirectURI) == 1 && len(code) == 1 {
-				if auth.Authenticate(AuthParameter{clientID: clientID[0], clientSecret: clientSecret[0], redirectURI: redirectURI[0], authorizationCode: code[0]}) {
+				if auth.Authenticate(AuthParameter{clientID: clientID[0], clientSecret: clientSecret[0], redirectURI: redirectURI[0], authorizationCode: code[0]}) >= 1 {
 					res := map[string]interface{}{
 						"access_token":  "access_token",
 						"refresh_token": "refresh_token",
-						"id":            "id",
 						"issued_at":     "issued_at",
 						"signature":     "signature",
 					}
@@ -86,10 +87,9 @@ func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
 			username := values["username"]
 			password := values["password"]
 			if len(username) == 1 && len(password) == 1 && len(clientID) == 1 && len(clientSecret) == 1 {
-				if auth.Authenticate(AuthParameter{username: username[0], password: password[0], clientID: clientID[0], clientSecret: clientSecret[0]}) {
+				if auth.Authenticate(AuthParameter{username: username[0], password: password[0], clientID: clientID[0], clientSecret: clientSecret[0]}) >= 1 {
 					res := map[string]interface{}{
 						"access_token": "access_token",
-						"id":           "id",
 						"issued_at":    "issued_at",
 						"signature":    "signature",
 					}
@@ -103,10 +103,9 @@ func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
 		if len(grantType) == 1 && grantType[0] == "refresh_token" {
 			refreshToken := values["refresh_token"]
 			if len(clientID) == 1 && len(clientSecret) == 1 {
-				if auth.Authenticate(AuthParameter{clientID: clientID[0], clientSecret: clientSecret[0], refreshToken: refreshToken[0]}) {
+				if auth.Authenticate(AuthParameter{clientID: clientID[0], clientSecret: clientSecret[0], refreshToken: refreshToken[0]}) >= 1 {
 					res := map[string]interface{}{
 						"access_token": "access_token",
-						"id":           "id",
 						"issued_at":    "issued_at",
 						"signature":    "signature",
 					}
