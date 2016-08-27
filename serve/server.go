@@ -72,16 +72,14 @@ func (server *Server) serve(w http.ResponseWriter, r *http.Request) {
 // NewServer for create new server
 func NewServer(port string, rootPath string, driver System) *Server {
 	server := new(Server)
-	server.port = port
 	server.path = rootPath
+	server.port = port
 	server.System = driver
+	server.contexts = make(map[*http.Request]*Context)
 
 	server.mux = http.NewServeMux()
-
 	server.mux.HandleFunc("/", server.serve)
 	new(OAuth2).Register(server.mux)
-
-	server.contexts = make(map[*http.Request]*Context)
 
 	server.moduleProvider = make(map[string]ModuleHandlerProvider)
 	server.Namespaces = make(map[string]*Namespace)
