@@ -395,6 +395,7 @@ func TestServeHttpNamespcaeAppModuleRootRedirect(t *testing.T) {
 func TestServeHttpOAuth(t *testing.T) {
 	query := "?grant_type=password&client_id=client_id&client_secret=client_secret&username=admin&password=admin"
 	req, err := http.NewRequest("GET", "http://localhost:3000/oauth2/token"+query, nil)
+	req.Method = "POST"
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -414,7 +415,7 @@ func TestServeHttpOAuth(t *testing.T) {
 
 	fmt.Printf("%d - %s", w.Code, w.Body.String())
 
-	if !(w.Code == 200 || strings.TrimSpace(w.Body.String()) == ". app module") {
+	if !(w.Code == 200 && strings.TrimSpace(w.Body.String()) == "{\"access_token\":\"access_token\",\"issued_at\":\"issued_at\",\"signature\":\"signature\"}") {
 		t.Error("return code is not 200")
 	}
 }
