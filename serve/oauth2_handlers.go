@@ -1,0 +1,123 @@
+package serve
+
+import (
+	"encoding/json"
+	"net/http"
+)
+
+// OAuth2 object
+type OAuth2 struct {
+	server *Server
+}
+
+// Authorize authorize
+func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
+	authProvider := oauth2.server.System.GetOAuthProvider()
+	values := r.URL.Query()
+
+	if r.Method == "POST" {
+		r.ParseForm()
+
+		responseCode := values["response_code"]
+
+		clientID := values["client_id"]
+		redirectURI := values["redirect_uri"]
+
+		username := r.Form["username"]
+		password := r.Form["password"]
+		state := values["state"]
+
+		if len(responseCode) == 1 && responseCode[0] == "code" {
+			if len(clientID) == 1 && len(redirectURI) == 1 && len(username) == 1 && len(password) == 1 {
+				ws := authProvider.GetWebserver()
+				code := ws.GetAuthorizationCode(clientID[0], redirectURI[0], username[0], password[0])
+				query := "?code=" + code
+				if len(state) > 0 {
+					query += "&state=" + state[0]
+				}
+				http.Redirect(w, r, redirectURI[0]+query, 302)
+			}
+		}
+
+		if len(responseCode) == 1 && responseCode[0] == "token" {
+			if len(clientID) == 1 && len(redirectURI) == 1 && len(username) == 1 && len(password) == 1 {
+				up := authProvider.GetUserAgent()
+				res := *up.GetAccessToken(clientID[0], redirectURI[0])
+				accessToken, _ := res["access_token"]
+				expiresIn, _ := res["expires_in"]
+				refreshToken, _ := res["refresh_token"]
+				issuedAt, _ := res["issued_at"]
+
+				query := "?access_token=" + accessToken + "&expires_in=" + expiresIn + "&refresh_token=" + refreshToken + "&issued_at=" + issuedAt
+
+				if len(state) > 0 {
+					query += "&state=" + state[0]
+				}
+
+				http.Redirect(w, r, redirectURI[0]+query, 302)
+			}
+		}
+	}
+
+	if r.Method == "GET" {
+		w.Write([]byte("login screen"))
+	}
+}
+
+// Token token
+func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
+	authProvider := oauth2.server.System.GetOAuthProvider()
+	values := r.URL.Query()
+	if r.Method == "POST" {
+		grantType := values["grant_type"]
+		clientID := values["client_id"]
+		clientSecret := values["client_secret"]
+
+		if len(grantType) == 1 && grantType[0] == "authorization_code" {
+			redirectURI := values["redirect_uri"]
+			code := values["code"]
+			if len(clientID) == 1 && len(clientSecret) == 1 && len(redirectURI) == 1 && len(code) == 1 {
+				ws := authProvider.GetWebserver()
+				res := ws.GetAccessToken(code[0], clientID[0], clientSecret[0], redirectURI[0])
+				res2, _ := json.Marshal(res)
+				w.WriteHeader(200)
+				w.Write(res2)
+			}
+		}
+
+		if len(grantType) == 1 && grantType[0] == "password" {
+			username := values["username"]
+			password := values["password"]
+			if len(username) == 1 && len(password) == 1 && len(clientID) == 1 && len(clientSecret) == 1 {
+				up := authProvider.GetUserPassword()
+				res := up.GetAccessToken(clientID[0], clientSecret[0], username[0], password[0])
+				res2, _ := json.Marshal(res)
+				w.WriteHeader(200)
+				w.Write(res2)
+			}
+		}
+
+		if len(grantType) == 1 && grantType[0] == "refresh_token" {
+			refreshToken := values["refresh_token"]
+			if len(clientID) == 1 && len(clientSecret) == 1 {
+				rt := authProvider.GetRefreshToken()
+				res := rt.GetAccessToken(refreshToken[0], clientID[0], clientSecret[0])
+				res2, _ := json.Marshal(res)
+				w.WriteHeader(200)
+				w.Write(res2)
+			}
+		}
+	}
+}
+
+// Register register oauth handlers
+func (oauth2 *OAuth2) Register(server *Server) {
+	mux := server.mux
+	oauth2.server = server
+	mux.HandleFunc("/oauth2/authorize", func(w http.ResponseWriter, r *http.Request) {
+		oauth2.Authorize(w, r)
+	})
+	mux.HandleFunc("/oauth2/token", func(w http.ResponseWriter, r *http.Request) {
+		oauth2.Token(w, r)
+	})
+}
