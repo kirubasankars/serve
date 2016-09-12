@@ -60,11 +60,11 @@ func TestServeHttp(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve") {
+		if path == filepath.FromSlash("/serve/config.json") {
 			b := []byte("{ \"roles\" : { \"admin\" : [\"home:permission\"] } }")
 			return &b
 		}
-		if path == filepath.FromSlash("/serve/modules/home") {
+		if path == filepath.FromSlash("/serve/modules/home/config.json") {
 			b := []byte("{ \"permissions\" : { \"permission\" : [\"admin\",\"url(GET /path/to/file)\"] } }")
 			return &b
 		}
@@ -98,11 +98,11 @@ func TestServeHttpModuleRootRedirect(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve") {
+		if path == filepath.FromSlash("/serve/config.json") {
 			b := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:permission\"] } }")
 			return &b
 		}
-		if path == filepath.FromSlash("/serve/modules/module") {
+		if path == filepath.FromSlash("/serve/modules/module/config.json") {
 			b := []byte("{ \"permissions\" : { \"permission\" : [\"url(GET /?)\"] } }")
 			return &b
 		}
@@ -134,11 +134,11 @@ func TestServeHttpAppModuleRootRedirect(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve/apps/app") {
+		if path == filepath.FromSlash("/serve/apps/app/config.json") {
 			ba := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:permission\"] } }")
 			return &ba
 		}
-		if path == filepath.FromSlash("/serve/modules/module") {
+		if path == filepath.FromSlash("/serve/modules/module/config.json") {
 			ba := []byte("{ \"permissions\" : { \"permission\" : [\"url(GET /?)\"] } }")
 			return &ba
 		}
@@ -177,11 +177,11 @@ func TestServeHttpAppModuleRoot(t *testing.T) {
 		return false
 	}
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve/apps/app") {
+		if path == filepath.FromSlash("/serve/apps/app/config.json") {
 			ba := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:permission\"] } }")
 			return &ba
 		}
-		if path == filepath.FromSlash("/serve/modules/module") {
+		if path == filepath.FromSlash("/serve/modules/module/config.json") {
 			ba := []byte("{ \"permissions\" : { \"permission\" : [\"url(GET /path/2/file)\"] } }")
 			return &ba
 		}
@@ -210,11 +210,11 @@ func TestServeHttpModuleRoot(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve") {
+		if path == filepath.FromSlash("/serve/config.json") {
 			ba := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:permission\"] } }")
 			return &ba
 		}
-		if path == filepath.FromSlash("/serve/modules/module") {
+		if path == filepath.FromSlash("/serve/modules/module/config.json") {
 			ba := []byte("{ \"permissions\" : { \"permission\" : [\"url(GET /)\"] } }")
 			return &ba
 		}
@@ -248,11 +248,11 @@ func TestServeHttpApp(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve/apps/app") {
+		if path == filepath.FromSlash("/serve/apps/app/config.json") {
 			ba := []byte("{ \"roles\" : { \"admin\" : [\"home:permission\"] } }")
 			return &ba
 		}
-		if path == filepath.FromSlash("/serve/modules/home") {
+		if path == filepath.FromSlash("/serve/modules/home/config.json") {
 			ba := []byte("{ \"permissions\" : { \"permission\" : [\"url(GET /)\"] } }")
 			return &ba
 		}
@@ -291,11 +291,11 @@ func TestServeHttpNamespaceAppNamespaceModuleRoot(t *testing.T) {
 		return false
 	}
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve/namespace/apps/app") {
+		if path == filepath.FromSlash("/serve/namespace/apps/app/config.json") {
 			ba := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:permission\"] } }")
 			return &ba
 		}
-		if path == filepath.FromSlash("/serve/namespace/modules/module") {
+		if path == filepath.FromSlash("/serve/namespace/modules/module/config.json") {
 			ba := []byte("{ \"permissions\" : { \"permission\" : [\"url(GET /)\"] } }")
 			return &ba
 		}
@@ -323,11 +323,11 @@ func TestServeHttpNamespaceModuleRoot(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve/namespace") {
+		if path == filepath.FromSlash("/serve/namespace/config.json") {
 			ba := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:admin\"] } }")
 			return &ba
 		}
-		if path == filepath.FromSlash("/serve/namespace/modules/module") {
+		if path == filepath.FromSlash("/serve/namespace/modules/module/config.json") {
 			ba := []byte("{ \"permissions\" : { \"admin\" : [\"url(GET /?)\"] } }")
 			return &ba
 		}
@@ -369,11 +369,11 @@ func TestServeHttpNamespcaeAppModuleRootRedirect(t *testing.T) {
 	}
 
 	getConfig := func(path string) *[]byte {
-		if path == filepath.FromSlash("/serve/namespace/apps/app") {
+		if path == filepath.FromSlash("/serve/namespace/apps/app/config.json") {
 			ba := []byte("{ \"modules\" : [\"module\"], \"roles\" : { \"admin\" : [\"module:admin\"] } }")
 			return &ba
 		}
-		if path == filepath.FromSlash("/serve/namespace/modules/module") {
+		if path == filepath.FromSlash("/serve/namespace/modules/module/config.json") {
 			ba := []byte("{ \"permissions\" : { \"admin\" : [\"url(GET /?)\"] } }")
 			return &ba
 		}
@@ -402,6 +402,14 @@ func TestServeHttpOAuth(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	getConfig := func(path string) *[]byte {
+		if path == filepath.FromSlash("/serve/users.json") {
+			ba := []byte("{ \"admin\" : { \"id\" : \"admin\", \"password\" : \"admin\", \"namespaces\" : { \"namespace\" : { \"apps\" : { \"app\" : { \"roles\" : [ \"\"] } } } } } }")
+			return &ba
+		}
+		if path == filepath.FromSlash("/serve/clients.json") {
+			ba := []byte("{ \"client_id\" : { \"id\" : \"client_id\", \"secret\" : \"client_secret\" } }")
+			return &ba
+		}
 		return nil
 	}
 	stat := func(path string) bool {
@@ -413,9 +421,49 @@ func TestServeHttpOAuth(t *testing.T) {
 	server.RegisterProvider(".", new(CommonSiteHandler))
 	server.ServeHTTP(w, req)
 
-	fmt.Printf("%d - %s", w.Code, w.Body.String())
-
 	if !(w.Code == 200 && strings.TrimSpace(w.Body.String()) == "{\"access_token\":\"access_token\",\"issued_at\":\"issued_at\",\"signature\":\"signature\"}") {
+		t.Error("return code is not 200")
+	}
+}
+
+func TestServeHttpOAuth1(t *testing.T) {
+	query := "?response_code=token&client_id=client_id&redirect_uri=namespace/app&username=admin&password=admin"
+	req, err := http.NewRequest("GET", "http://localhost:3000/oauth2/authorize"+query, nil)
+	req.Method = "POST"
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w := httptest.NewRecorder()
+	getConfig := func(path string) *[]byte {
+		if path == filepath.FromSlash("/serve/users.json") {
+			ba := []byte("{ \"admin\" : { \"id\" : \"admin\", \"password\" : \"admin\", \"roles\" : { \"namespace:app\" : [ \"\"]  } } }")
+			return &ba
+		}
+		if path == filepath.FromSlash("/serve/clients.json") {
+			ba := []byte("{ \"client_id\" : { \"id\" : \"client_id\", \"secret\" : \"client_secret\" } }")
+			return &ba
+		}
+		return nil
+	}
+	stat := func(path string) bool {
+		if path == filepath.FromSlash("/serve/namespace") {
+			return true
+		}
+		if path == filepath.FromSlash("/serve/namespace/apps/app") {
+			return true
+		}
+		return false
+	}
+
+	d := driver.NewFileSystem(stat, getConfig)
+	server := serve.NewServer("3000", "/serve", d)
+	server.RegisterProvider(".", new(CommonSiteHandler))
+	server.ServeHTTP(w, req)
+
+	fmt.Println(w)
+
+	if !(w.Code == 200 && strings.TrimSpace(w.Body.String()) == "{\"access_token\":\"access_token\",\"refresh_token\":\"refresh_token\",\"issued_at\":\"issued_at\"}") {
 		t.Error("return code is not 200")
 	}
 }

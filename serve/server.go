@@ -19,6 +19,7 @@ type Server struct {
 
 	Namespaces     map[string]*Namespace
 	moduleProvider map[string]ModuleHandlerProvider
+	AccessTokens   map[string]*AccessToken
 
 	serveHandler
 	sync.Mutex // <-- this mutex protects
@@ -75,6 +76,7 @@ func NewServer(port string, rootPath string, driver System) *Server {
 	server.path = rootPath
 	server.port = port
 	server.System = driver
+	server.AccessTokens = make(map[string]*AccessToken)
 	server.contexts = make(map[*http.Request]*Context)
 
 	server.mux = http.NewServeMux()

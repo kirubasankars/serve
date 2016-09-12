@@ -3,7 +3,6 @@ package driver
 import (
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"regexp"
 )
 
@@ -24,9 +23,14 @@ type FileSystem struct {
 	getConfig getConfigFunction
 }
 
+//GetConfig get config
+func (fs *FileSystem) GetConfig(path string) *[]byte {
+	return fs.getConfig(path)
+}
+
 //LoadConfig used for load config
 func LoadConfig(path string) *[]byte {
-	if s, err := ioutil.ReadFile(filepath.Join(path, "config.json")); err == nil {
+	if s, err := ioutil.ReadFile(path); err == nil {
 		return &s
 	}
 	return nil

@@ -8,7 +8,7 @@ type WebserverFlow interface {
 
 // UserAgentFlow UserAgentFlow
 type UserAgentFlow interface {
-	GetAccessToken(clientID string, redirectURL string) *map[string]string
+	GetAccessToken(clientID string, redirectURL string, username string, password string) *map[string]string
 }
 
 // UserPasswordFlow UserPasswordFlow
@@ -23,6 +23,7 @@ type RefreshTokenFlow interface {
 
 //OAuth2Provider oauth
 type OAuth2Provider interface {
+	Init(server *Server)
 	GetWebserver() WebserverFlow
 	GetUserAgent() UserAgentFlow
 	GetUserPassword() UserPasswordFlow

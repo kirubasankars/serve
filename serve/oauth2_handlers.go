@@ -12,7 +12,8 @@ type OAuth2 struct {
 
 // Authorize authorize
 func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
-	authProvider := oauth2.server.System.GetOAuthProvider()
+	server := oauth2.server
+	authProvider := server.System.GetOAuthProvider(server)
 	values := r.URL.Query()
 
 	if r.Method == "POST" {
@@ -42,7 +43,7 @@ func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
 		if len(responseCode) == 1 && responseCode[0] == "token" {
 			if len(clientID) == 1 && len(redirectURI) == 1 && len(username) == 1 && len(password) == 1 {
 				up := authProvider.GetUserAgent()
-				res := *up.GetAccessToken(clientID[0], redirectURI[0])
+				res := *up.GetAccessToken(clientID[0], redirectURI[0], username[0], password[0])
 				accessToken, _ := res["access_token"]
 				expiresIn, _ := res["expires_in"]
 				refreshToken, _ := res["refresh_token"]
@@ -54,7 +55,7 @@ func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
 					query += "&state=" + state[0]
 				}
 
-				http.Redirect(w, r, redirectURI[0]+query, 302)
+				http.Redirect(w, r, "/"+redirectURI[0]+query, 302)
 			}
 		}
 	}
@@ -66,7 +67,9 @@ func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
 
 // Token token
 func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
-	authProvider := oauth2.server.System.GetOAuthProvider()
+	server := oauth2.server
+	authProvider := server.System.GetOAuthProvider(server)
+
 	values := r.URL.Query()
 	if r.Method == "POST" {
 		grantType := values["grant_type"]
@@ -114,6 +117,9 @@ func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
 func (oauth2 *OAuth2) Register(server *Server) {
 	mux := server.mux
 	oauth2.server = server
+	mux.HandleFunc("/oauth2", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hi there\n"))
+	})
 	mux.HandleFunc("/oauth2/authorize", func(w http.ResponseWriter, r *http.Request) {
 		oauth2.Authorize(w, r)
 	})
