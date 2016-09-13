@@ -45,11 +45,9 @@ func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
 				up := authProvider.GetUserAgent()
 				res := *up.GetAccessToken(clientID[0], redirectURI[0], username[0], password[0])
 				accessToken, _ := res["access_token"]
-				expiresIn, _ := res["expires_in"]
-				refreshToken, _ := res["refresh_token"]
 				issuedAt, _ := res["issued_at"]
 
-				query := "?access_token=" + accessToken + "&expires_in=" + expiresIn + "&refresh_token=" + refreshToken + "&issued_at=" + issuedAt
+				query := "?access_token=" + accessToken + "&issued_at=" + issuedAt
 
 				if len(state) > 0 {
 					query += "&state=" + state[0]
