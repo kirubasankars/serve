@@ -23,6 +23,8 @@ func main() {
 	var err error
 	var path string
 
+	//test
+
 	if len(*rootPath) >= 0 {
 		path, err = filepath.Abs(*rootPath)
 	} else {
