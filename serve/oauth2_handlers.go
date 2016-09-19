@@ -36,23 +36,18 @@ func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
 				if len(state) > 0 {
 					query += "&state=" + state[0]
 				}
-				http.Redirect(w, r, redirectURI[0]+query, 302)
+				http.Redirect(w, r, "/oauth/code_callback"+query+"&redirect_uri="+redirectURI[0], 302)
 			}
 		}
 
 		if len(responseCode) == 1 && responseCode[0] == "token" {
 			if len(clientID) == 1 && len(redirectURI) == 1 && len(username) == 1 && len(password) == 1 {
 				up := authProvider.GetUserAgent()
-				res := *up.GetAccessToken(clientID[0], redirectURI[0], username[0], password[0])
-				accessToken, _ := res["access_token"]
-				issuedAt, _ := res["issued_at"]
-
-				query := "?access_token=" + accessToken + "&issued_at=" + issuedAt
-
+				t := up.GetAccessToken(clientID[0], redirectURI[0], username[0], password[0])
+				query := "?access_token=" + t.Token + "&issued_at=" + "issuedAt"
 				if len(state) > 0 {
 					query += "&state=" + state[0]
 				}
-
 				http.Redirect(w, r, "/"+redirectURI[0]+query, 302)
 			}
 		}
@@ -79,7 +74,12 @@ func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
 			code := values["code"]
 			if len(clientID) == 1 && len(clientSecret) == 1 && len(redirectURI) == 1 && len(code) == 1 {
 				ws := authProvider.GetWebserver()
-				res := ws.GetAccessToken(code[0], clientID[0], clientSecret[0], redirectURI[0])
+				t := ws.GetAccessToken(code[0], clientID[0], clientSecret[0], redirectURI[0])
+				res := map[string]string{
+					"access_token": t.Token,
+					"issued_at":    "issued_at",
+					"signature":    "signature",
+				}
 				res2, _ := json.Marshal(res)
 				w.WriteHeader(200)
 				w.Write(res2)
@@ -91,7 +91,12 @@ func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
 			password := values["password"]
 			if len(username) == 1 && len(password) == 1 && len(clientID) == 1 && len(clientSecret) == 1 {
 				up := authProvider.GetUserPassword()
-				res := up.GetAccessToken(clientID[0], clientSecret[0], username[0], password[0])
+				t := up.GetAccessToken(clientID[0], clientSecret[0], username[0], password[0])
+				res := map[string]string{
+					"access_token": t.Token,
+					"issued_at":    "issued_at",
+					"signature":    "signature",
+				}
 				res2, _ := json.Marshal(res)
 				w.WriteHeader(200)
 				w.Write(res2)

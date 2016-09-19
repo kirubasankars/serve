@@ -392,7 +392,7 @@ func TestServeHttpNamespcaeAppModuleRootRedirect(t *testing.T) {
 	}
 }
 
-func TestServeHttpOAuth(t *testing.T) {
+func TestServeHttpOAuthUserPassword(t *testing.T) {
 	query := "?grant_type=password&client_id=client_id&client_secret=client_secret&username=admin&password=admin"
 	req, err := http.NewRequest("GET", "http://localhost:3000/oauth2/token"+query, nil)
 	req.Method = "POST"
@@ -426,7 +426,7 @@ func TestServeHttpOAuth(t *testing.T) {
 	}
 }
 
-func TestServeHttpOAuth1(t *testing.T) {
+func TestServeHttpOAuthUserAgent(t *testing.T) {
 	query := "?response_code=token&client_id=client_id&redirect_uri=namespace/app&username=admin&password=admin"
 	req, err := http.NewRequest("GET", "http://localhost:3000/oauth2/authorize"+query, nil)
 	req.Method = "POST"
@@ -461,9 +461,47 @@ func TestServeHttpOAuth1(t *testing.T) {
 	server.RegisterProvider(".", new(CommonSiteHandler))
 	server.ServeHTTP(w, req)
 
-	fmt.Println(w)
+	if !(w.Code == 302 && w.Header().Get("Location") == "/namespace/app?access_token=access_token&issued_at=issuedAt") {
+		t.Error("return code is not 302")
+	}
+}
 
-	if !(w.Code == 200 && strings.TrimSpace(w.Body.String()) == "{\"access_token\":\"access_token\",\"refresh_token\":\"refresh_token\",\"issued_at\":\"issued_at\"}") {
-		t.Error("return code is not 200")
+func TestServeHttpOAuthWebServer(t *testing.T) {
+	query := "?response_code=code&client_id=client_id&redirect_uri=namespace/app&username=admin&password=admin"
+	req, err := http.NewRequest("GET", "http://localhost:3000/oauth2/authorize"+query, nil)
+	req.Method = "POST"
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w := httptest.NewRecorder()
+	getConfig := func(path string) *[]byte {
+		if path == filepath.FromSlash("/serve/users.json") {
+			ba := []byte("{ \"admin\" : { \"id\" : \"admin\", \"password\" : \"admin\", \"roles\" : { \"namespace:app\" : [ \"\"]  } } }")
+			return &ba
+		}
+		if path == filepath.FromSlash("/serve/clients.json") {
+			ba := []byte("{ \"client_id\" : { \"id\" : \"client_id\", \"secret\" : \"client_secret\" } }")
+			return &ba
+		}
+		return nil
+	}
+	stat := func(path string) bool {
+		if path == filepath.FromSlash("/serve/namespace") {
+			return true
+		}
+		if path == filepath.FromSlash("/serve/namespace/apps/app") {
+			return true
+		}
+		return false
+	}
+
+	d := driver.NewFileSystem(stat, getConfig)
+	server := serve.NewServer("3000", "/serve", d)
+	server.RegisterProvider(".", new(CommonSiteHandler))
+	server.ServeHTTP(w, req)
+
+	if !(w.Code == 302 && w.Header().Get("Location") == "/oauth/code_callback?code=12345678&redirect_uri=namespace/app") {
+		t.Error("return code is not 302")
 	}
 }

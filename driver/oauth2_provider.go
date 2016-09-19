@@ -18,14 +18,9 @@ func (ws *Webserver) GetAuthorizationCode(clientID string, redirectURL string, u
 }
 
 // GetAccessToken get access token
-func (ws *Webserver) GetAccessToken(authorizationCode string, clientID string, clientSecret string, redirectURL string) *map[string]string {
-	res := map[string]string{
-		"access_token":  "access_token",
-		"refresh_token": "refresh_token",
-		"issued_at":     "issued_at",
-		"signature":     "signature",
-	}
-	return &res
+func (ws *Webserver) GetAccessToken(authorizationCode string, clientID string, clientSecret string, redirectURL string) *serve.AccessToken {
+	res := new(serve.AccessToken)
+	return res
 }
 
 //UserAgent user agent flow
@@ -34,7 +29,7 @@ type UserAgent struct {
 }
 
 // GetAccessToken get access token
-func (ua *UserAgent) GetAccessToken(clientID string, redirectURL string, username string, password string) *map[string]string {
+func (ua *UserAgent) GetAccessToken(clientID string, redirectURL string, username string, password string) *serve.AccessToken {
 	server := ua.server
 	path := server.Path()
 	system := server.System
@@ -55,25 +50,18 @@ func (ua *UserAgent) GetAccessToken(clientID string, redirectURL string, usernam
 
 	//&& namespace != nil && app != nil
 
-	var res map[string]string
+	var t *serve.AccessToken
 
 	if user.Password == password && client != nil {
 		token := "access_token"
 
-		t := new(serve.AccessToken)
+		t = new(serve.AccessToken)
 		t.Token = token
 		t.Client = client
 		t.User = user
-		server.AccessTokens[token] = t
-
-		res = map[string]string{
-			"access_token":  token,
-			"refresh_token": "refresh_token",
-			"issued_at":     "issued_at",
-		}
 	}
 
-	return &res
+	return t
 }
 
 //UserPassword user password flow
@@ -82,32 +70,25 @@ type UserPassword struct {
 }
 
 // GetAccessToken get access token
-func (up *UserPassword) GetAccessToken(clientID string, clientSecret string, username string, password string) *map[string]string {
+func (up *UserPassword) GetAccessToken(clientID string, clientSecret string, username string, password string) *serve.AccessToken {
 	server := up.server
 	path := server.Path()
 	system := server.System
 
-	var res map[string]string
+	var t *serve.AccessToken
 	user := getUser(system, path, username)
 	client := getClient(system, path, clientID)
 
 	if client.Secret == clientSecret && user.Password == password {
 		token := "access_token"
 
-		t := new(serve.AccessToken)
+		t = new(serve.AccessToken)
 		t.Token = token
 		t.Client = client
 		t.User = user
-		server.AccessTokens[token] = t
-
-		res = map[string]string{
-			"access_token": token,
-			"issued_at":    "issued_at",
-			"signature":    "signature",
-		}
 	}
 
-	return &res
+	return t
 }
 
 //RefreshToken refresh token
@@ -116,13 +97,9 @@ type RefreshToken struct {
 }
 
 // GetAccessToken get access token
-func (rt *RefreshToken) GetAccessToken(refreshToken string, clientID string, clientSecret string) *map[string]string {
-	res := map[string]string{
-		"access_token": "access_token",
-		"issued_at":    "issued_at",
-		"signature":    "signature",
-	}
-	return &res
+func (rt *RefreshToken) GetAccessToken(refreshToken string, clientID string, clientSecret string) *serve.AccessToken {
+	t := new(serve.AccessToken)
+	return t
 }
 
 func getUser(system serve.System, path string, userID string) *serve.User {
