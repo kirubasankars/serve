@@ -37,5 +37,5 @@ func (auth *routeAuthenticator) Validate(ctx *Context, request *http.Request) bo
 	// 	}
 	// 	ctx.Module = nil
 	// }
-	return false
+	return true
 }

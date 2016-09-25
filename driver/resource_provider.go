@@ -57,7 +57,6 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 	}
 
 	if ctx.Module == nil {
-
 		var modules []string
 		appConfig := ctx.Application.Config
 		if appConfig != nil {
@@ -66,10 +65,14 @@ func (fs *FileSystem) Build(ctx *serve.Context, uri string) {
 
 		if currentIdx <= urlLen {
 			name := parts[currentIdx]
-			for idx := range modules {
-				if modules[idx] == name {
-					fs.GetModule(ctx, name)
-					break
+			if len(name) > 0 && string(name[0]) == "_" {
+				fs.GetModule(ctx, name)
+			} else {
+				for idx := range modules {
+					if modules[idx] == name {
+						fs.GetModule(ctx, name)
+						break
+					}
 				}
 			}
 		}

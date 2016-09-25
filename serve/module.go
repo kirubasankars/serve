@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
-	"strings"
 )
 
 // HTTPHandler its handler for serve
@@ -30,37 +29,37 @@ type Module struct {
 // Build build a module
 func (module *Module) Build() {
 	server := module.server
-	if module.Config != nil {
-		permissions := module.Config.Permissions
-		if permissions != nil {
-			if module.permissions == nil {
-				module.permissions = make(map[string][]string)
-			}
-
-			for permission, values := range permissions {
-				exp := ""
-				for idx := range values {
-					auth := values[idx]
-					le := len(auth)
-					if le > 6 && auth[0:4] == "url(" && auth[le-1:] == ")" {
-						exp += "^(" + auth[4:le-1] + ")$|"
-					} else {
-						if _, p := module.permissions[permission]; p == false {
-							module.permissions[permission] = make([]string, 0)
-						}
-						module.permissions[permission] = append(module.permissions[permission], auth)
-					}
-				}
-				exp = strings.TrimSuffix(exp, "|")
-				if len(exp) > 0 {
-					if module.permittedRoutes == nil {
-						module.permittedRoutes = make(map[string]*regexp.Regexp)
-					}
-					module.permittedRoutes[permission] = regexp.MustCompile(exp)
-				}
-			}
-		}
-	}
+	// if module.Config != nil {
+	// 	permissions := module.Config.Permissions
+	// 	if permissions != nil {
+	// 		if module.permissions == nil {
+	// 			module.permissions = make(map[string][]string)
+	// 		}
+	//
+	// 		for permission, values := range permissions {
+	// 			exp := ""
+	// 			for idx := range values {
+	// 				auth := values[idx]
+	// 				le := len(auth)
+	// 				if le > 6 && auth[0:4] == "url(" && auth[le-1:] == ")" {
+	// 					exp += "^(" + auth[4:le-1] + ")$|"
+	// 				} else {
+	// 					if _, p := module.permissions[permission]; p == false {
+	// 						module.permissions[permission] = make([]string, 0)
+	// 					}
+	// 					module.permissions[permission] = append(module.permissions[permission], auth)
+	// 				}
+	// 			}
+	// 			exp = strings.TrimSuffix(exp, "|")
+	// 			if len(exp) > 0 {
+	// 				if module.permittedRoutes == nil {
+	// 					module.permittedRoutes = make(map[string]*regexp.Regexp)
+	// 				}
+	// 				module.permittedRoutes[permission] = regexp.MustCompile(exp)
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	if provider, p := server.moduleProvider["."]; p {
 		provider.Build(*module)

@@ -12,7 +12,7 @@ const APPS string = "apps"
 // MODULES name of the folder
 const MODULES string = "modules"
 
-var re = regexp.MustCompile("[^A-Za-z0-9/.]+")
+var re = regexp.MustCompile("[^A-Za-z0-9/._]+")
 
 type statFunction func(path string) bool
 type getConfigFunction func(path string) *[]byte

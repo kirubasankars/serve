@@ -24,6 +24,7 @@ func (serveHandler *serveHandler) Serve(ctx Context, w http.ResponseWriter, r *h
 	server.contexts[r] = &ctx
 	fakeR, _ := http.NewRequest(r.Method, "/"+ctx.Module.Name+ctx.Path, nil)
 	handler, _ := ctx.Module.mux.Handler(fakeR)
+	//fmt.Println("/" + ctx.Module.Name + ctx.Path)
 	fakeR.URL.Path = r.URL.Path
 	handler.ServeHTTP(w, r)
 	delete(server.contexts, r)

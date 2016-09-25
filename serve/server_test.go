@@ -394,8 +394,7 @@ func TestServeHttpNamespcaeAppModuleRootRedirect(t *testing.T) {
 
 func TestServeHttpOAuthUserPassword(t *testing.T) {
 	query := "?grant_type=password&client_id=client_id&client_secret=client_secret&username=admin&password=admin"
-	req, err := http.NewRequest("GET", "http://localhost:3000/oauth2/token"+query, nil)
-	req.Method = "POST"
+	req, err := http.NewRequest("POST", "http://localhost:3000/_oauth2/token"+query, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -413,6 +412,12 @@ func TestServeHttpOAuthUserPassword(t *testing.T) {
 		return nil
 	}
 	stat := func(path string) bool {
+		if path == filepath.FromSlash("/serve") {
+			return true
+		}
+		if path == filepath.FromSlash("/serve/modules/_oauth2") {
+			return true
+		}
 		return false
 	}
 
@@ -428,8 +433,7 @@ func TestServeHttpOAuthUserPassword(t *testing.T) {
 
 func TestServeHttpOAuthUserAgent(t *testing.T) {
 	query := "?response_code=token&client_id=client_id&redirect_uri=namespace/app&username=admin&password=admin"
-	req, err := http.NewRequest("GET", "http://localhost:3000/oauth2/authorize"+query, nil)
-	req.Method = "POST"
+	req, err := http.NewRequest("POST", "http://localhost:3000/_oauth2/authorize"+query, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -447,10 +451,10 @@ func TestServeHttpOAuthUserAgent(t *testing.T) {
 		return nil
 	}
 	stat := func(path string) bool {
-		if path == filepath.FromSlash("/serve/namespace") {
+		if path == filepath.FromSlash("/serve") {
 			return true
 		}
-		if path == filepath.FromSlash("/serve/namespace/apps/app") {
+		if path == filepath.FromSlash("/serve/modules/_oauth2") {
 			return true
 		}
 		return false
@@ -468,7 +472,7 @@ func TestServeHttpOAuthUserAgent(t *testing.T) {
 
 func TestServeHttpOAuthWebServer(t *testing.T) {
 	query := "?response_code=code&client_id=client_id&redirect_uri=namespace/app&username=admin&password=admin"
-	req, err := http.NewRequest("GET", "http://localhost:3000/oauth2/authorize"+query, nil)
+	req, err := http.NewRequest("GET", "http://localhost:3000/_oauth2/authorize"+query, nil)
 	req.Method = "POST"
 	if err != nil {
 		log.Fatal(err)
@@ -487,10 +491,10 @@ func TestServeHttpOAuthWebServer(t *testing.T) {
 		return nil
 	}
 	stat := func(path string) bool {
-		if path == filepath.FromSlash("/serve/namespace") {
+		if path == filepath.FromSlash("/serve") {
 			return true
 		}
-		if path == filepath.FromSlash("/serve/namespace/apps/app") {
+		if path == filepath.FromSlash("/serve/modules/_oauth2") {
 			return true
 		}
 		return false
@@ -503,5 +507,36 @@ func TestServeHttpOAuthWebServer(t *testing.T) {
 
 	if !(w.Code == 302 && w.Header().Get("Location") == "/oauth/code_callback?code=12345678&redirect_uri=namespace/app") {
 		t.Error("return code is not 302")
+	}
+}
+
+func TestServeHttpOAuth2Module(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:3000/_oauth2/authorize/", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w := httptest.NewRecorder()
+	getConfig := func(path string) *[]byte {
+		return nil
+	}
+	stat := func(path string) bool {
+		if path == filepath.FromSlash("/serve") {
+			return true
+		}
+		if path == filepath.FromSlash("/serve/modules/_oauth2") {
+			return true
+		}
+		return false
+	}
+
+	d := driver.NewFileSystem(stat, getConfig)
+	server := serve.NewServer("3000", "~/workspace/serve", d)
+	server.ServeHTTP(w, req)
+
+	fmt.Println(w)
+
+	if !(w.Code == 200 && w.Body.String() == "login screen") {
+		t.Error("return code is not 200")
 	}
 }
