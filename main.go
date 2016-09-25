@@ -34,6 +34,8 @@ func main() {
 		return
 	}
 
+	fmt.Println("path", path)
+
 	server := serve.NewServer(strconv.Itoa(*port), path, driver.NewFileSystem(driver.Stat, driver.LoadConfig))
 	server.Start()
 }

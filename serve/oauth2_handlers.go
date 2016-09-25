@@ -16,45 +16,39 @@ func (oauth2 *OAuth2) Authorize(w http.ResponseWriter, r *http.Request) {
 	authProvider := server.System.GetOAuthProvider(server)
 	values := r.URL.Query()
 
-	if r.Method == "POST" {
-		r.ParseForm()
+	r.ParseForm()
 
-		responseCode := values["response_code"]
+	responseCode := values["response_code"]
 
-		clientID := values["client_id"]
-		redirectURI := values["redirect_uri"]
+	clientID := values["client_id"]
+	redirectURI := values["redirect_uri"]
 
-		username := r.Form["username"]
-		password := r.Form["password"]
-		state := values["state"]
+	username := r.Form["username"]
+	password := r.Form["password"]
+	state := values["state"]
 
-		if len(responseCode) == 1 && responseCode[0] == "code" {
-			if len(clientID) == 1 && len(redirectURI) == 1 && len(username) == 1 && len(password) == 1 {
-				ws := authProvider.GetWebserver()
-				code := ws.GetAuthorizationCode(clientID[0], redirectURI[0], username[0], password[0])
-				query := "?code=" + code
-				if len(state) > 0 {
-					query += "&state=" + state[0]
-				}
-				http.Redirect(w, r, "/oauth/code_callback"+query+"&redirect_uri="+redirectURI[0], 302)
+	if len(responseCode) == 1 && responseCode[0] == "code" {
+		if len(clientID) == 1 && len(redirectURI) == 1 && len(username) == 1 && len(password) == 1 {
+			ws := authProvider.GetWebserver()
+			code := ws.GetAuthorizationCode(clientID[0], redirectURI[0], username[0], password[0])
+			query := "?code=" + code
+			if len(state) > 0 {
+				query += "&state=" + state[0]
 			}
-		}
-
-		if len(responseCode) == 1 && responseCode[0] == "token" {
-			if len(clientID) == 1 && len(redirectURI) == 1 && len(username) == 1 && len(password) == 1 {
-				up := authProvider.GetUserAgent()
-				t := up.GetAccessToken(clientID[0], redirectURI[0], username[0], password[0])
-				query := "?access_token=" + t.Token + "&issued_at=" + "issuedAt"
-				if len(state) > 0 {
-					query += "&state=" + state[0]
-				}
-				http.Redirect(w, r, "/"+redirectURI[0]+query, 302)
-			}
+			http.Redirect(w, r, "/oauth/code_callback"+query+"&redirect_uri="+redirectURI[0], 302)
 		}
 	}
 
-	if r.Method == "GET" {
-		w.Write([]byte("login screen"))
+	if len(responseCode) == 1 && responseCode[0] == "token" {
+		if len(clientID) == 1 && len(redirectURI) == 1 && len(username) == 1 && len(password) == 1 {
+			up := authProvider.GetUserAgent()
+			t := up.GetAccessToken(clientID[0], redirectURI[0], username[0], password[0])
+			query := "?access_token=" + t.Token + "&issued_at=" + "issuedAt"
+			if len(state) > 0 {
+				query += "&state=" + state[0]
+			}
+			http.Redirect(w, r, "/"+redirectURI[0]+query, 302)
+		}
 	}
 }
 
@@ -114,19 +108,4 @@ func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-}
-
-// Register register oauth handlers
-func (oauth2 *OAuth2) Register(server *Server) {
-	mux := server.mux
-	oauth2.server = server
-	mux.HandleFunc("/oauth2", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hi there\n"))
-	})
-	mux.HandleFunc("/oauth2/authorize", func(w http.ResponseWriter, r *http.Request) {
-		oauth2.Authorize(w, r)
-	})
-	mux.HandleFunc("/oauth2/token", func(w http.ResponseWriter, r *http.Request) {
-		oauth2.Token(w, r)
-	})
 }
