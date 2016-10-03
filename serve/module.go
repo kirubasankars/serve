@@ -29,6 +29,7 @@ type Module struct {
 // Build build a module
 func (module *Module) Build() {
 	server := module.server
+
 	// if module.Config != nil {
 	// 	permissions := module.Config.Permissions
 	// 	if permissions != nil {
@@ -72,7 +73,6 @@ func (module *Module) Build() {
 	mux := module.mux
 
 	for pattern, handler := range module.Handlers {
-
 		if pattern != "" {
 			var mh = new(moduleHandler)
 			mh.handler = handler
@@ -95,6 +95,7 @@ type moduleHandler struct {
 
 func (mh *moduleHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	server := mh.module.server
+	//TODO: need to refactor.
 	mh.handler(*server.contexts[r], w, r)
 }
 

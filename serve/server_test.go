@@ -510,33 +510,33 @@ func TestServeHttpOAuthWebServer(t *testing.T) {
 	}
 }
 
-func TestServeHttpOAuth2Module(t *testing.T) {
-	req, err := http.NewRequest("GET", "http://localhost:3000/_oauth2/authorize/", nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w := httptest.NewRecorder()
-	getConfig := func(path string) *[]byte {
-		return nil
-	}
-	stat := func(path string) bool {
-		if path == filepath.FromSlash("/serve") {
-			return true
-		}
-		if path == filepath.FromSlash("/serve/modules/_oauth2") {
-			return true
-		}
-		return false
-	}
-
-	d := driver.NewFileSystem(stat, getConfig)
-	server := serve.NewServer("3000", "~/workspace/serve", d)
-	server.ServeHTTP(w, req)
-
-	fmt.Println(w)
-
-	if !(w.Code == 200 && w.Body.String() == "login screen") {
-		t.Error("return code is not 200")
-	}
-}
+// func TestServeHttpOAuth2Module(t *testing.T) {
+// 	req, err := http.NewRequest("GET", "http://localhost:3000/_oauth2/authorize/", nil)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+//
+// 	w := httptest.NewRecorder()
+// 	getConfig := func(path string) *[]byte {
+// 		return nil
+// 	}
+// 	stat := func(path string) bool {
+// 		if path == filepath.FromSlash("/serve") {
+// 			return true
+// 		}
+// 		if path == filepath.FromSlash("/serve/modules/_oauth2") {
+// 			return true
+// 		}
+// 		return false
+// 	}
+//
+// 	d := driver.NewFileSystem(stat, getConfig)
+// 	server := serve.NewServer("3000", "~/workspace/serve", d)
+// 	server.ServeHTTP(w, req)
+//
+// 	fmt.Println(w)
+//
+// 	if !(w.Code == 200 && w.Body.String() == "login screen") {
+// 		t.Error("return code is not 200")
+// 	}
+// }

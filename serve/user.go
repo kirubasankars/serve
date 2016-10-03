@@ -17,7 +17,8 @@ type UserApplication struct {
 	Roles []string
 }
 
-func newUser(id string) *User {
+//NewUser - will create user object.
+func NewUser(id string) *User {
 	user := new(User)
 	return user
 }

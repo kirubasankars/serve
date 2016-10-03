@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	_ "runtime"
-
 	"github.com/kirubasankars/serve/driver"
 	"github.com/kirubasankars/serve/serve"
 )
@@ -33,8 +31,6 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-
-	fmt.Println("path", path)
 
 	server := serve.NewServer(strconv.Itoa(*port), path, driver.NewFileSystem(driver.Stat, driver.LoadConfig))
 	server.Start()
