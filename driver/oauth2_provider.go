@@ -79,8 +79,6 @@ func (up *UserPassword) GetAccessToken(clientID string, clientSecret string, use
 	user := getUser(system, path, username)
 	client := getClient(system, path, clientID)
 
-	//fmt.Println(user, client)
-
 	if client.Secret == clientSecret && user.Password == password {
 		token := "access_token"
 
