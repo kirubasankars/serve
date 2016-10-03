@@ -2,6 +2,7 @@ package serve
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -80,6 +81,7 @@ func (oauth2 *OAuth2) Token(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		fmt.Println("fdasfsddasdasd")
 		if len(grantType) == 1 && grantType[0] == "password" {
 			username := values["username"]
 			password := values["password"]

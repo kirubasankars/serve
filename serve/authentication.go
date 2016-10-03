@@ -6,7 +6,7 @@ type Authentication struct {
 }
 
 // Authenticate authenticate with username and password
-func (auth *Authentication) Authenticate(param AuthParameter) int {
+func (auth *Authentication) Authenticate(param map[string]string) int {
 	//var count int
 
 	// server := auth.server
@@ -46,17 +46,4 @@ func (auth *Authentication) Authenticate(param AuthParameter) int {
 	// }
 
 	return 1
-}
-
-// AuthParameter authParameter
-type AuthParameter struct {
-	refreshToken      string
-	authorizationCode string
-
-	clientID     string
-	redirectURI  string
-	clientSecret string
-
-	username string
-	password string
 }

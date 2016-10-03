@@ -2,6 +2,7 @@ package driver
 
 import (
 	"encoding/json"
+	"fmt"
 	"path/filepath"
 
 	"github.com/kirubasankars/serve/serve"
@@ -78,6 +79,8 @@ func (up *UserPassword) GetAccessToken(clientID string, clientSecret string, use
 	var t *serve.AccessToken
 	user := getUser(system, path, username)
 	client := getClient(system, path, clientID)
+
+	fmt.Println(user, client)
 
 	if client.Secret == clientSecret && user.Password == password {
 		token := "access_token"

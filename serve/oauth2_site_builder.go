@@ -32,6 +32,7 @@ func (oauth2 *OAuth2Builder) Build(module Module) {
 	}
 
 	module.Handlers["/token"] = func(ctx Context, w http.ResponseWriter, r *http.Request) {
+
 		hanlder.Token(w, r)
 	}
 

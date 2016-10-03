@@ -60,7 +60,7 @@ func (server *Server) serve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := newContext(server, r)
+	ctx := NewContext(server, r)
 	if ctx == nil || ctx.Module == nil {
 		http.NotFound(w, r)
 		return
@@ -72,20 +72,21 @@ func (server *Server) serve(w http.ResponseWriter, r *http.Request) {
 // NewServer for create new server
 func NewServer(port string, rootPath string, driver System) *Server {
 	server := new(Server)
+	
 	server.path = rootPath
 	server.port = port
 	server.System = driver
 	server.AccessTokens = make(map[string]*AccessToken)
 	server.contexts = make(map[*http.Request]*Context)
+	server.moduleProvider = make(map[string]ModuleHandlerProvider)
+	server.Namespaces = make(map[string]*Namespace)
 
 	server.mux = http.NewServeMux()
 	server.mux.HandleFunc("/", server.serve)
-	//new(OAuth2).Register(server)
 
-	server.moduleProvider = make(map[string]ModuleHandlerProvider)
-	server.Namespaces = make(map[string]*Namespace)
 	server.RegisterProvider(".", new(commonHandlerBuilder))
 	server.RegisterProvider("_oauth2", new(OAuth2Builder))
+
 	return server
 }
 
@@ -97,6 +98,5 @@ func (server *Server) RegisterProvider(name string, provider ModuleHandlerProvid
 // ServeFile serve file
 func (server *Server) ServeFile(w http.ResponseWriter, r *http.Request, file string) {
 	path := filepath.Join(server.Path(), file)
-	fmt.Println("Serving : ", path)
 	http.ServeFile(w, r, path)
 }

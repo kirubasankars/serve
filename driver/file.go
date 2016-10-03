@@ -25,6 +25,7 @@ type FileSystem struct {
 
 //GetConfig get config
 func (fs *FileSystem) GetConfig(path string) *[]byte {
+	strings.Trim()
 	return fs.getConfig(path)
 }
 
