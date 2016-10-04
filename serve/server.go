@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"path/filepath"
 	"sync"
 	"time"
 )
@@ -72,7 +71,7 @@ func (server *Server) serve(w http.ResponseWriter, r *http.Request) {
 // NewServer for create new server
 func NewServer(port string, rootPath string, driver System) *Server {
 	server := new(Server)
-	
+
 	server.path = rootPath
 	server.port = port
 	server.System = driver
@@ -93,10 +92,4 @@ func NewServer(port string, rootPath string, driver System) *Server {
 //RegisterProvider to register handler provider
 func (server *Server) RegisterProvider(name string, provider ModuleHandlerProvider) {
 	server.moduleProvider[name] = provider
-}
-
-// ServeFile serve file
-func (server *Server) ServeFile(w http.ResponseWriter, r *http.Request, file string) {
-	path := filepath.Join(server.Path(), file)
-	http.ServeFile(w, r, path)
 }

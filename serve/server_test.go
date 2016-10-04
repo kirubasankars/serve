@@ -77,7 +77,7 @@ func TestServeHttp(t *testing.T) {
 		return false
 	}
 
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
 	server.ServeHTTP(w, req)
@@ -115,7 +115,7 @@ func TestServeHttpModuleRootRedirect(t *testing.T) {
 		return false
 	}
 
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 	server := serve.NewServer("3000", "/serve", d)
 	server.ServeHTTP(w, req)
 
@@ -150,7 +150,7 @@ func TestServeHttpAppModuleRootRedirect(t *testing.T) {
 		}
 		return false
 	}
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 
 	server := serve.NewServer("3000", "/serve", d)
 	server.ServeHTTP(w, req)
@@ -188,7 +188,7 @@ func TestServeHttpAppModuleRoot(t *testing.T) {
 		return nil
 	}
 
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
@@ -226,7 +226,7 @@ func TestServeHttpModuleRoot(t *testing.T) {
 		}
 		return false
 	}
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
 	server.ServeHTTP(w, req)
@@ -264,7 +264,7 @@ func TestServeHttpApp(t *testing.T) {
 		}
 		return false
 	}
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
 	server.ServeHTTP(w, req)
@@ -301,7 +301,7 @@ func TestServeHttpNamespaceAppNamespaceModuleRoot(t *testing.T) {
 		}
 		return nil
 	}
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
 	server.ServeHTTP(w, req)
@@ -341,7 +341,7 @@ func TestServeHttpNamespaceModuleRoot(t *testing.T) {
 		return false
 	}
 
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
 	server.ServeHTTP(w, req)
@@ -380,7 +380,7 @@ func TestServeHttpNamespcaeAppModuleRootRedirect(t *testing.T) {
 		return nil
 	}
 
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 	server := serve.NewServer("3000", "/serve", d)
 	server.ServeHTTP(w, req)
 
@@ -421,7 +421,7 @@ func TestServeHttpOAuthUserPassword(t *testing.T) {
 		return false
 	}
 
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
 	server.ServeHTTP(w, req)
@@ -460,7 +460,7 @@ func TestServeHttpOAuthUserAgent(t *testing.T) {
 		return false
 	}
 
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
 	server.ServeHTTP(w, req)
@@ -500,7 +500,7 @@ func TestServeHttpOAuthWebServer(t *testing.T) {
 		return false
 	}
 
-	d := driver.NewFileSystem(stat, getConfig)
+	d := driver.NewFileSystem(stat, getConfig, nil)
 	server := serve.NewServer("3000", "/serve", d)
 	server.RegisterProvider(".", new(CommonSiteHandler))
 	server.ServeHTTP(w, req)
@@ -510,33 +510,35 @@ func TestServeHttpOAuthWebServer(t *testing.T) {
 	}
 }
 
-// func TestServeHttpOAuth2Module(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "http://localhost:3000/_oauth2/authorize/", nil)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-//
-// 	w := httptest.NewRecorder()
-// 	getConfig := func(path string) *[]byte {
-// 		return nil
-// 	}
-// 	stat := func(path string) bool {
-// 		if path == filepath.FromSlash("/serve") {
-// 			return true
-// 		}
-// 		if path == filepath.FromSlash("/serve/modules/_oauth2") {
-// 			return true
-// 		}
-// 		return false
-// 	}
-//
-// 	d := driver.NewFileSystem(stat, getConfig)
-// 	server := serve.NewServer("3000", "~/workspace/serve", d)
-// 	server.ServeHTTP(w, req)
-//
-// 	fmt.Println(w)
-//
-// 	if !(w.Code == 200 && w.Body.String() == "login screen") {
-// 		t.Error("return code is not 200")
-// 	}
-// }
+func TestServeHttpOAuth2Module(t *testing.T) {
+	req, err := http.NewRequest("GET", "http://localhost:3000/_oauth2/authorize/", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w := httptest.NewRecorder()
+	getConfig := func(path string) *[]byte {
+		return nil
+	}
+	stat := func(path string) bool {
+		if path == filepath.FromSlash("/serve") {
+			return true
+		}
+		if path == filepath.FromSlash("/serve/modules/_oauth2") {
+			return true
+		}
+		return false
+	}
+
+	serveFile := func(ctx *serve.Context, w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("login screen"))
+	}
+
+	d := driver.NewFileSystem(stat, getConfig, serveFile)
+	server := serve.NewServer("3000", "/serve", d)
+	server.ServeHTTP(w, req)
+
+	if !(w.Code == 200 && w.Body.String() == "login screen") {
+		t.Error("return code is not 200")
+	}
+}

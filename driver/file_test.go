@@ -1,6 +1,7 @@
 package driver_test
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/kirubasankars/serve/driver"
@@ -98,13 +99,17 @@ func TestBuildRedirectApp(t *testing.T) {
 	}
 
 	stat := func(path string) bool {
-		if path == "/serve" || path == "/serve/apps/app" || path == "/serve/modules/home" {
+		if path == "/serve/apps/app" || path == "/ctx *serve.Context, w http.ResponseWriter, r *http.Requestrve/modules/home" {
 			return true
 		}
 		return false
 	}
 
-	fs := driver.NewFileSystem(stat, getConfig)
+	serveFile := func(ctx *serve.Context, w http.ResponseWriter, r *http.Request) {
+
+	}
+
+	fs := driver.NewFileSystem(stat, getConfig, serveFile)
 	ctx := new(serve.Context)
 	ctx.Server = serve.NewServer("", "/serve", fs)
 	ctx.URL = "/app"
